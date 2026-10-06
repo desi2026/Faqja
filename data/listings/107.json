@@ -1,0 +1,37 @@
+{
+  "id": 107,
+  "added": "2026-09-02",
+  "deal": "sale",
+  "type": "land",
+  "zone": "golem",
+  "price": 160000,
+  "area": 1200,
+  "lat": 41.242,
+  "lng": 19.525,
+  "title_sq": "Truall për ndërtim",
+  "title_en": "Building plot",
+  "desc_sq": "Me leje ndërtimi për vilë, 400 m nga plazhi, rrugë e asfaltuar deri në truall.",
+  "desc_en": "Permit for a villa, 400 m from the beach, paved road to the plot.",
+  "status": "available",
+  "deed": "yes",
+  "features": [],
+  "images": [
+    {
+      "image": "/images/samples/land-3.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/land-1.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/land-2.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "truall-per-ndertim-107",
+  "slug_en": "building-plot-107",
+  "sea_m": 400,
+  "agent": "agjenti-3"
+}

@@ -1,0 +1,54 @@
+{
+  "id": 101,
+  "added": "2026-10-02",
+  "deal": "sale",
+  "type": "apartment",
+  "zone": "blloku",
+  "price": 285000,
+  "area": 120,
+  "beds": 2,
+  "baths": 2,
+  "floor": 7,
+  "lat": 41.3195,
+  "lng": 19.816,
+  "title_sq": "Apartament 2+1 me pamje nga Liqeni",
+  "title_en": "2-bed apartment with lake view",
+  "desc_sq": "Kat i 7-të, ballkon i gjerë, i mobiluar plotësisht, parkim nëntokësor. Apartamenti ka dy dhoma gjumi, sallon me kuzhinë të hapur dhe pamje të drejtpërdrejtë nga Parku i Madh.",
+  "desc_en": "7th floor, wide balcony, fully furnished, underground parking. Two bedrooms, an open-plan living room and kitchen, and a direct view over the Grand Park.",
+  "status": "available",
+  "deed": "yes",
+  "condition": "renovated",
+  "year_built": 2012,
+  "features": [
+    "elevator",
+    "parking",
+    "furnished",
+    "balcony",
+    "heating",
+    "ac"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/apartment-3.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-1.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-2.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "apartament-2-1-me-pamje-nga-liqeni-101",
+  "slug_en": "2-bed-apartment-with-lake-view-101",
+  "floors_total": 10,
+  "area_net": 105,
+  "orientation": [
+    "south",
+    "east"
+  ],
+  "agent": "agjenti-2"
+}

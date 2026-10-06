@@ -1,0 +1,41 @@
+{
+  "id": 111,
+  "added": "2026-08-04",
+  "deal": "sale",
+  "type": "office",
+  "zone": "astiri",
+  "price": 340000,
+  "area": 240,
+  "baths": 2,
+  "lat": 41.339,
+  "lng": 19.779,
+  "title_sq": "Ambient biznesi në rrugë kryesore",
+  "title_en": "Commercial space on the main road",
+  "desc_sq": "Vitrinë 18 m, parkim para objektit, i përshtatshëm për showroom ose dyqan.",
+  "desc_en": "18 m shop front, parking in front, suitable for a showroom or store.",
+  "status": "available",
+  "deed": "yes",
+  "condition": "good",
+  "year_built": 2011,
+  "features": [
+    "parking"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/office-1.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/office-2.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/office-3.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "ambient-biznesi-ne-rruge-kryesore-111",
+  "slug_en": "commercial-space-on-the-main-road-111",
+  "floor": 0
+}

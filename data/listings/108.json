@@ -1,0 +1,46 @@
+{
+  "id": 108,
+  "added": "2026-08-27",
+  "deal": "sale",
+  "type": "apartment",
+  "zone": "vlore",
+  "price": 175000,
+  "area": 92,
+  "beds": 2,
+  "baths": 1,
+  "floor": 6,
+  "lat": 40.456,
+  "lng": 19.484,
+  "title_sq": "Apartament në Lungomare",
+  "title_en": "Apartment on the Lungomare",
+  "desc_sq": "Hapi i parë nga shëtitorja, pamje deti nga dhoma e ndenjes, i mobiluar.",
+  "desc_en": "Steps from the promenade, sea view from the living room, furnished.",
+  "status": "available",
+  "deed": "yes",
+  "condition": "good",
+  "year_built": 2019,
+  "features": [
+    "seaview",
+    "elevator",
+    "furnished",
+    "balcony",
+    "ac"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/apartment-1.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-2.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-3.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "apartament-ne-lungomare-108",
+  "slug_en": "apartment-on-the-lungomare-108"
+}

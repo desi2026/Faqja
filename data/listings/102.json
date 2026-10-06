@@ -1,0 +1,50 @@
+{
+  "id": 102,
+  "added": "2026-09-30",
+  "deal": "sale",
+  "type": "villa",
+  "zone": "ksamil",
+  "price": 640000,
+  "area": 260,
+  "beds": 4,
+  "baths": 3,
+  "lat": 39.769,
+  "lng": 20.0005,
+  "title_sq": "Vilë me pishinë pranë detit",
+  "title_en": "Seaside villa with pool",
+  "desc_sq": "300 m nga plazhi, oborr 600 m², pishinë private dhe tarracë panoramike me pamje nga ishujt e Ksamilit.",
+  "desc_en": "300 m from the beach, 600 m² garden, private pool and a panoramic terrace overlooking the Ksamil islands.",
+  "status": "available",
+  "deed": "yes",
+  "condition": "new",
+  "year_built": 2023,
+  "features": [
+    "pool",
+    "garden",
+    "seaview",
+    "terrace",
+    "parking",
+    "ac",
+    "security"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/villa-1.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/villa-2.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/villa-3.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "vile-me-pishine-prane-detit-102",
+  "slug_en": "seaside-villa-with-pool-102",
+  "plot_area": 600,
+  "sea_m": 300,
+  "agent": "agjenti-3"
+}

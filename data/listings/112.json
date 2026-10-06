@@ -1,0 +1,46 @@
+{
+  "id": 112,
+  "added": "2026-07-22",
+  "deal": "rent",
+  "type": "apartment",
+  "zone": "blloku",
+  "price": 1100,
+  "area": 95,
+  "beds": 2,
+  "baths": 2,
+  "floor": 8,
+  "lat": 41.32,
+  "lng": 19.815,
+  "title_sq": "Penthouse i vogël me tarracë",
+  "title_en": "Compact penthouse with terrace",
+  "desc_sq": "Tarracë 40 m², i mobiluar me shije, në zemër të Bllokut.",
+  "desc_en": "40 m² terrace, tastefully furnished, in the heart of Blloku.",
+  "status": "available",
+  "deed": "yes",
+  "condition": "renovated",
+  "year_built": 2009,
+  "features": [
+    "terrace",
+    "elevator",
+    "furnished",
+    "ac",
+    "heating"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/apartment-2.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-3.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-1.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "penthouse-i-vogel-me-tarrace-112",
+  "slug_en": "compact-penthouse-with-terrace-112"
+}

@@ -1,0 +1,41 @@
+{
+  "id": 115,
+  "added": "2026-06-15",
+  "deal": "sale",
+  "type": "villa",
+  "zone": "golem",
+  "price": 420000,
+  "area": 220,
+  "beds": 4,
+  "baths": 3,
+  "lat": 41.245,
+  "lng": 19.52,
+  "title_sq": "Vilë dykatëshe me oborr në Golem",
+  "title_en": "Two-storey villa with garden in Golem",
+  "desc_sq": "Vilë me oborr 500 m², 5 minuta në këmbë nga plazhi.",
+  "desc_en": "Villa with a 500 m² garden, a 5-minute walk from the beach.",
+  "status": "sold",
+  "deed": "yes",
+  "condition": "good",
+  "year_built": 2015,
+  "features": [
+    "garden",
+    "parking",
+    "terrace",
+    "ac"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/villa-1.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/villa-2.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "vile-dykateshe-me-oborr-ne-golem-115",
+  "slug_en": "two-storey-villa-with-garden-in-golem-115",
+  "plot_area": 500
+}

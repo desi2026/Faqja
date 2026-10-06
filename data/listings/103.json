@@ -1,0 +1,48 @@
+{
+  "id": 103,
+  "added": "2026-09-28",
+  "deal": "rent",
+  "type": "apartment",
+  "zone": "komuna",
+  "price": 750,
+  "area": 85,
+  "beds": 2,
+  "baths": 1,
+  "floor": 4,
+  "lat": 41.317,
+  "lng": 19.793,
+  "title_sq": "Apartament 2+1 me qira",
+  "title_en": "2-bed apartment for rent",
+  "desc_sq": "Pranë parkut, ngrohje qendrore, gati për banim. Kontratë minimumi 12 muaj.",
+  "desc_en": "Next to the park, central heating, ready to move in. Minimum 12-month lease.",
+  "status": "available",
+  "deed": "yes",
+  "condition": "good",
+  "year_built": 2008,
+  "features": [
+    "elevator",
+    "heating",
+    "balcony"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/apartment-2.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-3.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-1.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "apartament-2-1-me-qira-103",
+  "slug_en": "2-bed-apartment-for-rent-103",
+  "floors_total": 8,
+  "deposit_months": 1,
+  "min_term_months": 12,
+  "agent": "agjenti-2"
+}

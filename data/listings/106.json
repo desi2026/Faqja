@@ -1,0 +1,45 @@
+{
+  "id": 106,
+  "added": "2026-09-10",
+  "deal": "sale",
+  "type": "apartment",
+  "zone": "liqeni",
+  "price": 210000,
+  "area": 105,
+  "beds": 2,
+  "baths": 2,
+  "floor": 5,
+  "lat": 41.296,
+  "lng": 19.803,
+  "title_sq": "Apartament 2+1 i ri",
+  "title_en": "New-build 2-bed apartment",
+  "desc_sq": "Ndërtim 2025, me çelës në dorë, dy ballkone dhe vend parkimi.",
+  "desc_en": "Built 2025, turnkey finish, two balconies and a parking space.",
+  "status": "reserved",
+  "deed": "process",
+  "condition": "new",
+  "year_built": 2025,
+  "features": [
+    "elevator",
+    "parking",
+    "balcony",
+    "heating"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/apartment-2.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-3.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-1.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "apartament-2-1-i-ri-106",
+  "slug_en": "new-build-2-bed-apartment-106"
+}

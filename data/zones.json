@@ -1,0 +1,118 @@
+{
+  "groups": [
+    {
+      "id": "tirana",
+      "sq": "Tiranë",
+      "en": "Tirana",
+      "city": true,
+      "in_sq": "në Tiranë",
+      "intro_sq": "Tirana është kryeqyteti dhe qyteti më i madh i Shqipërisë, me lagje për çdo stil jetese, nga Blloku i gjallë deri te Kodra e Diellit e qetë. Këtu gjen apartamente, vila dhe zyra për shitje dhe me qira.",
+      "intro_en": "Tirana is Albania's capital and largest city, with a neighbourhood for every lifestyle, from lively Blloku to quiet Kodra e Diellit. Here you'll find apartments, villas and offices for sale and for rent.",
+      "areas": [
+        {
+          "id": "blloku",
+          "sq": "Blloku",
+          "en": "Blloku",
+          "in_sq": "në Bllok",
+          "region": "Tiranë",
+          "intro_sq": "Blloku është zona më e kërkuar e Tiranës, me kafene, restorante dhe jetë nate, dy hapa nga Parku i Madh dhe Liqeni Artificial. Apartamentet këtu mbajnë vlerën dhe jepen lehtë me qira.",
+          "intro_en": "Blloku is Tirana's most sought-after district, full of cafés, restaurants and nightlife, steps from the Grand Park and the Artificial Lake. Apartments here hold their value and rent out easily."
+        },
+        {
+          "id": "komuna",
+          "sq": "Komuna e Parisit",
+          "en": "Komuna e Parisit",
+          "in_sq": "në Komunën e Parisit",
+          "region": "Tiranë",
+          "intro_sq": "Komuna e Parisit është lagje e qetë familjare me parqe, shkolla dhe ndërtime të reja, pak minuta nga qendra e Tiranës.",
+          "intro_en": "Komuna e Parisit is a quiet family neighbourhood with parks, schools and new buildings, a few minutes from central Tirana."
+        },
+        {
+          "id": "liqeni",
+          "sq": "Liqeni i Thatë",
+          "en": "Liqeni i Thatë",
+          "in_sq": "në Liqenin e Thatë",
+          "region": "Tiranë",
+          "intro_sq": "Liqeni i Thatë është një nga zonat me më shumë ndërtime të reja në Tiranë, me pamje nga liqeni dhe akses të shpejtë drejt Unazës së Madhe.",
+          "intro_en": "Liqeni i Thatë is one of Tirana's fastest-growing areas for new builds, with lake views and quick access to the Grand Ring Road."
+        },
+        {
+          "id": "qender",
+          "sq": "Qendër",
+          "en": "City Centre",
+          "region": "Tiranë",
+          "intro_sq": "Qendra e Tiranës, rreth Sheshit Skënderbej, është vendi ideal për zyra, biznese dhe apartamente me qira afatshkurtër.",
+          "intro_en": "Central Tirana, around Skanderbeg Square, is the natural home for offices, businesses and short-let apartments."
+        },
+        {
+          "id": "kodra",
+          "sq": "Kodra e Diellit",
+          "en": "Kodra e Diellit",
+          "in_sq": "në Kodrën e Diellit",
+          "region": "Tiranë",
+          "intro_sq": "Kodra e Diellit ofron vila dhe shtëpi me oborr në një zonë të gjelbër e të qetë, larg zhurmës së qytetit.",
+          "intro_en": "Kodra e Diellit offers villas and houses with gardens in a green, quiet setting away from the city noise."
+        },
+        {
+          "id": "astiri",
+          "sq": "Astir",
+          "en": "Astir",
+          "region": "Tiranë",
+          "intro_sq": "Astiri është zonë në zhvillim me çmime më të arritshme, ambiente biznesi dhe akses të drejtpërdrejtë në autostradën Tiranë–Durrës.",
+          "intro_en": "Astir is a developing area with more affordable prices, commercial spaces and direct access to the Tirana–Durrës motorway."
+        }
+      ]
+    },
+    {
+      "id": "coast",
+      "sq": "Bregdeti",
+      "en": "Coast",
+      "in_sq": "në bregdet",
+      "in_en": "on the Albanian coast",
+      "intro_sq": "Zonat bregdetare që mbulojmë shtrihen nga Durrësi dhe Golemi deri te Vlora, Saranda dhe Ksamili, përgjatë Adriatikut dhe Jonit. Këtu gjen shtëpi pushimi, apartamente në vijë të parë dhe trualle, për të jetuar pranë detit, për pushime ose për investim.",
+      "intro_en": "Our coastal areas run from Durrës and Golem to Vlorë, Sarandë and Ksamil, along the Adriatic and Ionian seas. Here you'll find holiday homes, front-line apartments and plots, whether you want to live by the sea, spend your holidays there or invest.",
+      "areas": [
+        {
+          "id": "durres",
+          "sq": "Durrës",
+          "en": "Durrës",
+          "region": "Durrës",
+          "intro_sq": "Durrësi është qyteti bregdetar më afër Tiranës, me plazhe të gjata ranore dhe apartamente në vijë të parë për banim ose investim.",
+          "intro_en": "Durrës is the closest seaside city to Tirana, with long sandy beaches and front-line apartments for living or investment."
+        },
+        {
+          "id": "golem",
+          "sq": "Golem",
+          "en": "Golem",
+          "region": "Durrës",
+          "intro_sq": "Golemi është zonë turistike me vila, trualle dhe rezidenca pushimi, 15 km në jug të Durrësit.",
+          "intro_en": "Golem is a resort area with villas, plots and holiday residences, 15 km south of Durrës."
+        },
+        {
+          "id": "vlore",
+          "sq": "Vlorë",
+          "en": "Vlorë",
+          "region": "Vlorë",
+          "intro_sq": "Vlora bashkon jetën e qytetit me Lungomaren e re dhe plazhet e Rivierës Shqiptare. Është një treg në rritje të shpejtë.",
+          "intro_en": "Vlorë combines city life with the new Lungomare promenade and the beaches of the Albanian Riviera. It is a fast-growing market."
+        },
+        {
+          "id": "sarande",
+          "sq": "Sarandë",
+          "en": "Sarandë",
+          "region": "Vlorë",
+          "intro_sq": "Saranda, përballë Korfuzit, është destinacioni më i kërkuar i jugut për shtëpi pushimi dhe qira sezonale.",
+          "intro_en": "Sarandë, facing Corfu, is the south's most sought-after destination for holiday homes and seasonal rentals."
+        },
+        {
+          "id": "ksamil",
+          "sq": "Ksamil",
+          "en": "Ksamil",
+          "region": "Vlorë",
+          "intro_sq": "Ksamili, me ishujt dhe ujërat e kristalta, ofron vila dhe apartamente pranë detit me kërkesë të lartë turistike.",
+          "intro_en": "Ksamil, with its islands and crystal-clear water, offers seaside villas and apartments with strong holiday demand."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": 110,
+  "added": "2026-08-12",
+  "deal": "sale",
+  "type": "apartment",
+  "zone": "sarande",
+  "price": 132000,
+  "area": 70,
+  "beds": 1,
+  "baths": 1,
+  "floor": 3,
+  "lat": 39.874,
+  "lng": 20.005,
+  "title_sq": "Apartament 1+1 me pamje Korfuzin",
+  "title_en": "1-bed apartment facing Corfu",
+  "desc_sq": "Tarracë 20 m², pranë portit, ideal për qira sezonale.",
+  "desc_en": "20 m² terrace, near the port, ideal for holiday rental.",
+  "status": "available",
+  "deed": "no",
+  "condition": "good",
+  "year_built": 2014,
+  "features": [
+    "seaview",
+    "terrace",
+    "furnished",
+    "ac"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/apartment-3.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-1.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-2.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "apartament-1-1-me-pamje-korfuzin-110",
+  "slug_en": "1-bed-apartment-facing-corfu-110"
+}

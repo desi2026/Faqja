@@ -1,0 +1,40 @@
+{
+  "id": 113,
+  "added": "2026-07-10",
+  "deal": "sale",
+  "type": "apartment",
+  "zone": "blloku",
+  "price": 260000,
+  "area": 110,
+  "beds": 2,
+  "baths": 2,
+  "floor": 6,
+  "lat": 41.3188,
+  "lng": 19.8175,
+  "title_sq": "Apartament 2+1 pranë Parkut të Madh",
+  "title_en": "2-bed apartment by the Grand Park",
+  "desc_sq": "Apartament i ndriçuar me dy ballkone, kat i 6-të me ashensor.",
+  "desc_en": "Bright apartment with two balconies, 6th floor with lift.",
+  "status": "sold",
+  "deed": "yes",
+  "condition": "renovated",
+  "year_built": 2013,
+  "features": [
+    "elevator",
+    "balcony",
+    "heating"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/apartment-2.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-1.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "apartament-2-1-prane-parkut-te-madh-113",
+  "slug_en": "2-bed-apartment-by-the-grand-park-113"
+}

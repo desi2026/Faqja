@@ -1,0 +1,47 @@
+{
+  "id": 104,
+  "added": "2026-09-25",
+  "deal": "sale",
+  "type": "apartment",
+  "zone": "durres",
+  "price": 118000,
+  "area": 78,
+  "beds": 1,
+  "baths": 1,
+  "floor": 9,
+  "lat": 41.311,
+  "lng": 19.46,
+  "title_sq": "Apartament 1+1 në vijë të parë",
+  "title_en": "Front-line 1-bed apartment",
+  "desc_sq": "Pamje e plotë nga deti, kompleks me roje 24 orë, pishinë e përbashkët.",
+  "desc_en": "Full sea view, gated complex with 24-hour security and a shared pool.",
+  "status": "available",
+  "deed": "yes",
+  "condition": "good",
+  "year_built": 2016,
+  "features": [
+    "seaview",
+    "elevator",
+    "pool",
+    "security",
+    "balcony",
+    "ac"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/apartment-3.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-1.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/apartment-2.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "apartament-1-1-ne-vije-te-pare-104",
+  "slug_en": "front-line-1-bed-apartment-104"
+}

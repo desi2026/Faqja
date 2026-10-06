@@ -1,0 +1,276 @@
+# Decap CMS configuration (the admin panel at /admin). Requires decap-cms 3.16 or later (see admin/index.html).
+# The zone and agent option lists are filled in from data/zones.json and data/about.json on every build (see build.js).
+backend:
+  name: git-gateway
+  branch: main
+site_url: __SITE_URL__
+display_url: __SITE_URL__
+media_folder: static/images/uploads
+public_folder: /images/uploads
+# Photos are resized to at most 1600 px and their metadata (including the GPS location) is removed before upload.
+media_processing:
+  enabled: true
+  width: 1600
+  quality: 80
+  strip_metadata: true
+  format: { enabled: true, default: jpeg }
+# File names and links without ë, ç or spaces.
+slug:
+  encoding: ascii
+  clean_accents: true
+
+collections:
+  - name: pronat
+    label: Pronat
+    label_singular: Pronë
+    description: "Çdo pronë ruhet më vete. Pronat e shitura ose të dhëna me qira mbeten online me statusin përkatës; 'Fshih' i heq plotësisht."
+    folder: data/listings
+    format: json
+    extension: json
+    create: true
+    slug: "{{fields.id}}"
+    identifier_field: title_sq
+    summary: "{{fields.id}} · {{fields.title_sq}} · {{fields.status}}"
+    sortable_fields:
+      - { field: added, label: "Data e shtimit", default_sort: desc }
+      - { field: id, label: "Kodi" }
+      - { field: price, label: "Çmimi" }
+    view_filters:
+      - { label: "Në shitje", field: deal, pattern: sale }
+      - { label: "Me qira", field: deal, pattern: rent }
+      - { label: "Të lira", field: status, pattern: available }
+      - { label: "Të shitura / dhëna me qira", field: status, pattern: "sold|rented" }
+    view_groups:
+      - { label: "Zona", field: zone }
+      - { label: "Statusi", field: status }
+    editor: { preview: false }
+    fields:
+      - { label: "Kodi i pronës", name: id, widget: number, value_type: int, min: 1, hint: "Numër unik, p.sh. 116. Mos e ndrysho pasi prona publikohet: është kodi që kërkojnë klientët dhe linku i shkurtër (p.sh. isaproperties.al/116)." }
+      - { label: "Data e shtimit", name: added, widget: datetime, format: "YYYY-MM-DD", date_format: "DD.MM.YYYY", time_format: false, default: "{{now}}" }
+      - { label: "Data e ndryshimit të fundit (opsionale)", name: updated, widget: datetime, format: "YYYY-MM-DD", date_format: "DD.MM.YYYY", time_format: false, required: false, hint: "Plotësoje kur ndryshon çmimin ose statusin; Google e sheh si datë rifreskimi." }
+      - { label: "Qëllimi", name: deal, widget: select, options: [{ label: "Në shitje", value: sale }, { label: "Me qira (çmimi për muaj)", value: rent }] }
+      - { label: "Lloji", name: type, widget: select, options: [{ label: "Apartament", value: apartment }, { label: "Vilë", value: villa }, { label: "Zyrë / Ambient biznesi", value: office }, { label: "Truall", value: land }] }
+      - { label: "Zona", name: zone, widget: select, options: __ZONE_OPTIONS__ }
+      - { label: "Statusi", name: status, widget: select, default: available, options: [{ label: "E lirë", value: available }, { label: "E rezervuar", value: reserved }, { label: "E shitur", value: sold }, { label: "E dhënë me qira", value: rented }] }
+      - { label: "Agjenti përgjegjës (opsional)", name: agent, widget: select, required: false, options: __AGENT_OPTIONS__, hint: "WhatsApp-i dhe telefoni i pronës shkojnë te ky agjent. Agjentët shtohen te Cilësimet → Rreth nesh, ekipi dhe vlerësimet → Ekipi." }
+      - { label: "Çmimi (€)", name: price, widget: number, value_type: int, min: 0, required: false, hint: "Për qiranë: çmimi për muaj. Lëre bosh për 'Çmimi me marrëveshje'." }
+      - { label: "Sipërfaqja bruto (m²)", name: area, widget: number, value_type: int, min: 0, required: false }
+      - { label: "Sipërfaqja neto (m², opsionale)", name: area_net, widget: number, value_type: int, min: 0, required: false }
+      - { label: "Sipërfaqja e truallit / oborrit (m², opsionale)", name: plot_area, widget: number, value_type: int, min: 0, required: false }
+      - { label: "Dhoma gjumi", name: beds, widget: number, value_type: int, min: 0, required: false }
+      - { label: "Banjo", name: baths, widget: number, value_type: int, min: 0, required: false }
+      - { label: "Kati", name: floor, widget: number, value_type: int, required: false, hint: "0 = kati përdhes, -1 = bodrum. Lëre bosh për truall." }
+      - { label: "Gjithsej kate në pallat (opsionale)", name: floors_total, widget: number, value_type: int, min: 1, required: false }
+      - label: "Orientimi (opsional)"
+        name: orientation
+        widget: select
+        multiple: true
+        required: false
+        options: [{ label: "Veri", value: north }, { label: "Jug", value: south }, { label: "Lindje", value: east }, { label: "Perëndim", value: west }]
+      - { label: "Largësia nga deti (metra, opsionale)", name: sea_m, widget: number, value_type: int, min: 0, required: false }
+      - { label: "Depozita (sa qira mujore, vetëm për qira)", name: deposit_months, widget: number, value_type: int, min: 0, required: false }
+      - { label: "Afati minimal i qirasë (muaj, vetëm për qira)", name: min_term_months, widget: number, value_type: int, min: 0, required: false }
+      - { label: "E lirë nga data (opsionale)", name: available_from, widget: datetime, format: "YYYY-MM-DD", date_format: "DD.MM.YYYY", time_format: false, required: false }
+      - { label: "Titulli (shqip)", name: title_sq, widget: string, pattern: ["^.{3,100}$", "Titulli duhet të ketë 3 deri në 100 shkronja."] }
+      - { label: "Titulli (anglisht)", name: title_en, widget: string, pattern: ["^.{3,100}$", "The title must be 3 to 100 characters."] }
+      - { label: "Linku në shqip (opsional)", name: slug_sq, widget: string, required: false, pattern: ["^[a-z0-9-]*$", "Vetëm shkronja të vogla pa ë/ç, numra dhe viza."], hint: "Lëre bosh: krijohet vetë nga titulli. Linqet e vjetra ridrejtohen vetë sipas kodit." }
+      - { label: "Linku në anglisht (opsional)", name: slug_en, widget: string, required: false, pattern: ["^[a-z0-9-]*$", "Lowercase letters, numbers and dashes only."] }
+      - { label: "Përshkrimi (shqip)", name: desc_sq, widget: text, hint: "Një rresht bosh fillon paragraf të ri." }
+      - { label: "Përshkrimi (anglisht)", name: desc_en, widget: text }
+      - label: "Fotot (e para del si kryesore)"
+        name: images
+        widget: list
+        summary: "{{fields.image}}"
+        hint: "Jepi çdo fotoje emër të ri (p.sh. 116-1.jpg); mos zëvendëso një foto ekzistuese me të njëjtin emër. Fotot zvogëlohen vetë dhe u hiqet vendndodhja GPS."
+        fields:
+          - { label: "Foto", name: image, widget: image, choose_url: false }
+          - { label: "Përshkrimi i fotos (opsional, p.sh. 'Salloni me ballkon')", name: alt, widget: string, required: false }
+      - { label: "Gjerësia gjeografike (lat), p.sh. 41.3195", name: lat, widget: number, value_type: float, min: 39, max: 43, required: false, hint: "Në Google Maps kliko me të djathtën mbi vend dhe kopjo numrat. Plotëso të dyja ose asnjërën. Në faqe shfaqet vetëm zona e përafërt." }
+      - { label: "Gjatësia gjeografike (lng), p.sh. 19.8160", name: lng, widget: number, value_type: float, min: 18.5, max: 21.5, required: false }
+      - { label: "Hipoteka", name: deed, widget: select, required: false, options: [{ label: "Me hipotekë", value: "yes" }, { label: "Hipoteka në proces", value: process }, { label: "Pa hipotekë", value: "no" }] }
+      - { label: "Gjendja", name: condition, widget: select, required: false, options: [{ label: "E re", value: new }, { label: "E rikonstruktuar", value: renovated }, { label: "Në gjendje të mirë", value: good }, { label: "Për rikonstruksion", value: torenovate }] }
+      - { label: "Viti i ndërtimit", name: year_built, widget: number, value_type: int, min: 1900, max: 2100, required: false }
+      - label: "Karakteristikat"
+        name: features
+        widget: select
+        multiple: true
+        required: false
+        options:
+          - { label: "Parkim", value: parking }
+          - { label: "Garazh", value: garage }
+          - { label: "Ashensor", value: elevator }
+          - { label: "E mobiluar", value: furnished }
+          - { label: "Pamje nga deti", value: seaview }
+          - { label: "Ballkon", value: balcony }
+          - { label: "Tarracë", value: terrace }
+          - { label: "Pishinë", value: pool }
+          - { label: "Oborr", value: garden }
+          - { label: "Ngrohje qendrore", value: heating }
+          - { label: "Kondicioner", value: ac }
+          - { label: "Roje 24/7", value: security }
+          - { label: "Depo / bodrum", value: storage }
+      - { label: "Video ose tur virtual (link i plotë: YouTube, Instagram ose Matterport)", name: video, widget: string, required: false, pattern: ["^(https://\\S+)?$", "Linku duhet të fillojë me https://"] }
+      - { label: "Fshih plotësisht nga faqja", name: hidden, widget: boolean, required: false, default: false }
+
+  - name: artikuj
+    label: Artikujt
+    label_singular: Artikull
+    folder: content/articles
+    format: json
+    extension: json
+    create: true
+    slug: "{{fields.slug_sq}}"
+    identifier_field: title_sq
+    summary: "{{fields.date}} · {{fields.title_sq}}"
+    sortable_fields:
+      - { field: date, label: "Data", default_sort: desc }
+      - { field: title_sq, label: "Titulli" }
+    editor: { preview: false }
+    fields:
+      - { label: "Data e publikimit", name: date, widget: datetime, format: "YYYY-MM-DD", date_format: "DD.MM.YYYY", time_format: false, default: "{{now}}" }
+      - { label: "Përditësuar më (opsionale)", name: updated, widget: datetime, format: "YYYY-MM-DD", date_format: "DD.MM.YYYY", time_format: false, required: false, hint: "Plotësoje kur ndryshon përmbajtjen (p.sh. norma të reja të kredisë)." }
+      - { label: "Titulli (shqip)", name: title_sq, widget: string }
+      - { label: "Titulli (anglisht)", name: title_en, widget: string }
+      - { label: "Linku në shqip (p.sh. si-te-blesh-shtepi)", name: slug_sq, widget: string, pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Vetëm shkronja të vogla pa ë/ç, numra dhe viza."], hint: "Mos e ndrysho pasi artikulli publikohet." }
+      - { label: "Linku në anglisht", name: slug_en, widget: string, pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Lowercase letters, numbers and dashes only."] }
+      - { label: "Përmbledhje (shqip, 1–2 fjali, del në Google)", name: excerpt_sq, widget: text }
+      - { label: "Përmbledhje (anglisht)", name: excerpt_en, widget: text }
+      - { label: "Foto kryesore", name: image, widget: image, required: false, choose_url: false }
+      - { label: "Teksti (shqip)", name: body_sq, widget: markdown, buttons: [bold, italic, link, heading-two, heading-three, bulleted-list, numbered-list], editor_components: [], hint: "Linqet brenda faqes shkruhen si /zona/blloku/ ose /#calculator." }
+      - { label: "Teksti (anglisht)", name: body_en, widget: markdown, buttons: [bold, italic, link, heading-two, heading-three, bulleted-list, numbered-list], editor_components: [] }
+      - { label: "Draft (mos e publiko ende)", name: draft, widget: boolean, required: false, default: false }
+
+  - name: settings
+    label: Cilësimet
+    editor: { preview: false }
+    files:
+      - name: site
+        label: Agjencia dhe kontaktet
+        file: data/site.json
+        fields:
+          - { label: "Emri i agjencisë (marka)", name: brand, widget: string }
+          - { label: "Nëntitulli", name: tagline, widget: string }
+          - { label: "Emri ligjor i shoqërisë (si në QKB)", name: legalName, widget: string, required: false, hint: "I detyrueshëm nga ligji 9/2022 para publikimit, p.sh. Isa Consulting & Properties sh.p.k." }
+          - { label: "NIPT", name: nipt, widget: string, required: false, pattern: ["^([A-Za-z][0-9]{8}[A-Za-z])?$", "Formati: L12345678A"] }
+          - { label: "Ndërmjetësi i licencuar (emri)", name: brokerName, widget: string, required: false }
+          - { label: "Numri i certifikatës së ndërmjetësit", name: brokerCertificate, widget: string, required: false }
+          - { label: "Domeni (me https://)", name: domain, widget: string, pattern: ["^https?://[^/\\s]+/?$", "Shkruaje si https://www.isaproperties.al"], hint: "I njëjtë me domenin kryesor në Netlify (me ose pa www)." }
+          - { label: "WhatsApp", name: whatsapp, widget: string, pattern: ["^[+0-9 ()-]{9,22}$", "Shkruaj numrin me prefiksin, p.sh. +355 69 123 4567"], hint: "P.sh. +355 69 123 4567 ose 355691234567." }
+          - { label: "Telefoni siç shfaqet", name: phoneDisplay, widget: string }
+          - { label: "Email", name: email, widget: string, pattern: ["^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "Email jo i saktë"] }
+          - { label: "Adresa e plotë", name: address, widget: string }
+          - { label: "Rruga", name: streetAddress, widget: string }
+          - { label: "Qyteti", name: city, widget: string }
+          - { label: "Kodi postar", name: postalCode, widget: string, required: false }
+          - label: "Koordinatat e zyrës"
+            name: geo
+            widget: object
+            required: false
+            hint: "Opsionale. Pa to, adresa në faqe hap Google Maps me emrin e agjencisë dhe adresën."
+            fields:
+              - { label: lat, name: lat, widget: number, value_type: float, min: 39, max: 43, required: false }
+              - { label: lng, name: lng, widget: number, value_type: float, min: 18.5, max: 21.5, required: false }
+          - { label: "Orari për Google (p.sh. Mo-Sa 09:00-19:00)", name: openingHours, widget: string, required: false }
+          - { label: "Orari siç shfaqet (shqip)", name: hoursText_sq, widget: string }
+          - { label: "Orari siç shfaqet (anglisht)", name: hoursText_en, widget: string }
+          - { label: "Linku i profilit në Google Maps (Google Business)", name: gbpUrl, widget: string, required: false, pattern: ["^(https://\\S+)?$", "Linku duhet të fillojë me https://"] }
+          - { label: "Instagram (link ose @emri)", name: instagram, widget: string, required: false }
+          - { label: "Facebook (link)", name: facebook, widget: string, required: false }
+          - { label: "Shënim për komisionin te çdo pronë (shqip, opsional)", name: commissionNote_sq, widget: string, required: false, hint: "P.sh. 'Blerësi nuk paguan komision.' Tarifat e plota janë te Kushtet dhe tarifat." }
+          - { label: "Shënim për komisionin (anglisht)", name: commissionNote_en, widget: string, required: false }
+          - { label: "Google Analytics ID (G-XXXXXXX)", name: googleAnalyticsId, widget: string, required: false, hint: "Plotësoje vetëm pasi juristi të ketë parë politikën e privatësisë." }
+          - { label: "Meta Pixel ID (vetëm numri)", name: metaPixelId, widget: string, required: false, hint: "Plotësoje vetëm pasi juristi të ketë parë politikën e privatësisë." }
+          - { label: "Kodi i verifikimit Google Search Console (metoda 'HTML tag')", name: googleSiteVerification, widget: string, required: false }
+          - { label: "Sa ditë quhet 'e re' një pronë (0 = mos e trego)", name: newDays, widget: number, value_type: int, min: 0 }
+          - { label: "Data e politikës së privatësisë", name: privacyUpdated, widget: datetime, format: "YYYY-MM-DD", date_format: "DD.MM.YYYY", time_format: false, hint: "Ndryshoje vetëm kur ndryshon teksti i politikës." }
+      - name: terms
+        label: Kushtet dhe tarifat
+        file: data/terms.json
+        fields:
+          - { label: "Shfaq shënimin 'shembull' (hiqe pasi të vendosësh tarifat reale)", name: sample, widget: boolean, required: false }
+          - { label: "Përditësuar më", name: updated, widget: datetime, format: "YYYY-MM-DD", date_format: "DD.MM.YYYY", time_format: false }
+          - { label: "Teksti (shqip)", name: body_sq, widget: markdown, buttons: [bold, italic, link, heading-two, heading-three, bulleted-list, numbered-list], editor_components: [] }
+          - { label: "Teksti (anglisht)", name: body_en, widget: markdown, buttons: [bold, italic, link, heading-two, heading-three, bulleted-list, numbered-list], editor_components: [] }
+      - name: zones
+        label: Zonat
+        file: data/zones.json
+        fields:
+          - label: Grupet
+            name: groups
+            widget: list
+            summary: "{{fields.sq}}"
+            fields:
+              - { label: "Kodi (mos e ndrysho pasi publikohet)", name: id, widget: string, pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Vetëm shkronja të vogla pa ë/ç, numra dhe viza."] }
+              - { label: "Emri (shqip)", name: sq, widget: string }
+              - { label: "Emri (anglisht)", name: en, widget: string }
+              - { label: "Është qytet (p.sh. Tiranë)", name: city, widget: boolean, required: false, default: false }
+              - { label: "Si shkruhet pas 'Prona…' (shqip), p.sh. 'në Tiranë'", name: in_sq, widget: string, required: false }
+              - { label: "Si shkruhet pas 'Properties…' (anglisht), p.sh. 'in Tirana'", name: in_en, widget: string, required: false }
+              - { label: "Teksti hyrës i grupit (shqip)", name: intro_sq, widget: text, required: false }
+              - { label: "Teksti hyrës i grupit (anglisht)", name: intro_en, widget: text, required: false }
+              - label: Zonat
+                name: areas
+                widget: list
+                summary: "{{fields.sq}}"
+                fields:
+                  - { label: "Kodi në link (p.sh. blloku; mos e ndrysho pasi publikohet)", name: id, widget: string, pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Vetëm shkronja të vogla pa ë/ç, numra dhe viza."] }
+                  - { label: "Emri (shqip)", name: sq, widget: string }
+                  - { label: "Emri (anglisht)", name: en, widget: string }
+                  - { label: "Si shkruhet pas 'Prona…' (shqip), p.sh. 'në Bllok'", name: in_sq, widget: string, required: false }
+                  - { label: "Si shkruhet pas 'Properties…' (anglisht), p.sh. 'in Blloku'", name: in_en, widget: string, required: false }
+                  - { label: "Qarku (p.sh. Tiranë, Durrës, Vlorë)", name: region, widget: string, required: false }
+                  - { label: "Teksti hyrës (shqip)", name: intro_sq, widget: text, required: false }
+                  - { label: "Teksti hyrës (anglisht)", name: intro_en, widget: text, required: false }
+                  - { label: "Titulli për Google (shqip, opsional)", name: title_sq, widget: string, required: false }
+                  - { label: "Titulli për Google (anglisht, opsional)", name: title_en, widget: string, required: false }
+                  - { label: "Përshkrimi për Google (shqip, opsional)", name: desc_sq, widget: text, required: false }
+                  - { label: "Përshkrimi për Google (anglisht, opsional)", name: desc_en, widget: text, required: false }
+      - name: about
+        label: Rreth nesh, ekipi dhe vlerësimet
+        file: data/about.json
+        fields:
+          - { label: "Shfaq shënimin 'shembull'", name: sample, widget: boolean, required: false }
+          - { label: "Hyrja (shqip)", name: intro_sq, widget: text }
+          - { label: "Hyrja (anglisht)", name: intro_en, widget: text }
+          - label: Shifrat
+            name: stats
+            widget: list
+            summary: "{{fields.value}} {{fields.sq}}"
+            fields:
+              - { label: "Shifra (p.sh. 10+)", name: value, widget: string }
+              - { label: "Teksti (shqip)", name: sq, widget: string }
+              - { label: "Teksti (anglisht)", name: en, widget: string }
+          - label: Si punojmë
+            name: values
+            widget: list
+            summary: "{{fields.title_sq}}"
+            fields:
+              - { label: "Titulli (shqip)", name: title_sq, widget: string }
+              - { label: "Titulli (anglisht)", name: title_en, widget: string }
+              - { label: "Teksti (shqip)", name: text_sq, widget: text }
+              - { label: "Teksti (anglisht)", name: text_en, widget: text }
+          - label: Ekipi
+            name: team
+            widget: list
+            summary: "{{fields.name}}"
+            fields:
+              - { label: "Kodi i agjentit (p.sh. agjenti-1; mos e ndrysho)", name: key, widget: string, required: false, pattern: ["^([a-z0-9]+(-[a-z0-9]+)*)?$", "Vetëm shkronja të vogla, numra dhe viza."], hint: "Me këtë kod agjenti zgjidhet te pronat." }
+              - { label: "Emri", name: name, widget: string }
+              - { label: "Roli (shqip)", name: role_sq, widget: string }
+              - { label: "Roli (anglisht)", name: role_en, widget: string }
+              - { label: "Telefoni", name: phone, widget: string, required: false }
+              - { label: "WhatsApp", name: whatsapp, widget: string, required: false, pattern: ["^([+0-9 ()-]{9,22})?$", "Shkruaj numrin me prefiksin, p.sh. +355 69 123 4567"] }
+              - { label: "Gjuhët", name: languages, widget: string, required: false }
+              - { label: "Numri i certifikatës së ndërmjetësit (opsional)", name: certificate, widget: string, required: false }
+              - { label: "Foto", name: photo, widget: image, required: false, choose_url: false }
+          - label: Vlerësimet e klientëve
+            name: testimonials
+            widget: list
+            summary: "{{fields.name}}"
+            hint: "Vetëm vlerësime të vërteta, me lejen e klientit."
+            fields:
+              - { label: "Emri", name: name, widget: string }
+              - { label: "Kush është (shqip), p.sh. Blerës, Tiranë", name: place_sq, widget: string, required: false }
+              - { label: "Kush është (anglisht)", name: place_en, widget: string, required: false }
+              - { label: "Vlerësimi (shqip)", name: text_sq, widget: text }
+              - { label: "Vlerësimi (anglisht)", name: text_en, widget: text }

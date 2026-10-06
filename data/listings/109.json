@@ -1,0 +1,46 @@
+{
+  "id": 109,
+  "added": "2026-08-20",
+  "deal": "rent",
+  "type": "villa",
+  "zone": "kodra",
+  "price": 2800,
+  "area": 320,
+  "beds": 5,
+  "baths": 4,
+  "lat": 41.301,
+  "lng": 19.835,
+  "title_sq": "Vilë me oborr me qira",
+  "title_en": "Villa with garden for rent",
+  "desc_sq": "Lagje e qetë, oborr i gjelbër, garazh për 2 makina, sistem alarmi.",
+  "desc_en": "Quiet residential area, green garden, 2-car garage, alarm system.",
+  "status": "available",
+  "deed": "yes",
+  "condition": "good",
+  "year_built": 2010,
+  "features": [
+    "garden",
+    "garage",
+    "security",
+    "heating",
+    "ac",
+    "storage"
+  ],
+  "images": [
+    {
+      "image": "/images/samples/villa-2.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/villa-3.jpg",
+      "alt": ""
+    },
+    {
+      "image": "/images/samples/villa-1.jpg",
+      "alt": ""
+    }
+  ],
+  "sample": true,
+  "slug_sq": "vile-me-oborr-me-qira-109",
+  "slug_en": "villa-with-garden-for-rent-109"
+}

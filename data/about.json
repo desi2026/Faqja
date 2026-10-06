@@ -1,0 +1,34 @@
+{
+  "sample": true,
+  "intro_sq": "Jemi një agjenci imobiliare me qendër në Tiranë që punon me apartamente, vila, ambiente biznesi dhe trualle në kryeqytet dhe në bregdet. Çdo pronë që publikojmë e kemi parë vetë dhe ia kemi kontrolluar dokumentet. Na shkruaj në WhatsApp, edhe për pyetje të vogla.",
+  "intro_en": "We are a Tirana-based real estate agency working with apartments, villas, commercial spaces and land in the capital and on the coast. We visit every property we publish and check its documents ourselves. Message us on WhatsApp, even for small questions.",
+  "stats": [
+    { "value": "10+", "sq": "vite në tregun e pronave", "en": "years in real estate" },
+    { "value": "300+", "sq": "prona të shitura dhe të dhëna me qira", "en": "properties sold and rented" },
+    { "value": "4", "sq": "agjentë në ekip", "en": "agents on the team" }
+  ],
+  "values": [
+    { "title_sq": "Prona të verifikuara", "title_en": "Verified properties",
+      "text_sq": "Kontrollojmë hipotekën, barrët dhe lejet para se të publikojmë një pronë.", "text_en": "We check the title deed, liens and permits before we publish a property." },
+    { "title_sq": "Çmime të qarta", "title_en": "Clear prices",
+      "text_sq": "Çmimi që sheh është çmimi real. Komisionin e di që në fillim.", "text_en": "The price you see is the real price. You know our commission from the start." },
+    { "title_sq": "Deri te noteri", "title_en": "All the way to the notary",
+      "text_sq": "Të shoqërojmë te banka, noteri dhe kadastra derisa të marrësh çelësat.", "text_en": "We go with you to the bank, the notary and the land registry until you get the keys." }
+  ],
+  "team": [
+    { "key": "agjenti-1", "name": "Emri Mbiemri", "role_sq": "Drejtuese e agjencisë", "role_en": "Managing director", "phone": "+355 69 000 0001", "whatsapp": "355690000001", "languages": "Shqip, English, Italiano", "certificate": "", "photo": "" },
+    { "key": "agjenti-2", "name": "Emri Mbiemri", "role_sq": "Agjent shitjesh, Tiranë", "role_en": "Sales agent, Tirana", "phone": "+355 69 000 0002", "whatsapp": "355690000002", "languages": "Shqip, English", "certificate": "", "photo": "" },
+    { "key": "agjenti-3", "name": "Emri Mbiemri", "role_sq": "Agjente, bregdeti", "role_en": "Agent, coast", "phone": "+355 69 000 0003", "whatsapp": "355690000003", "languages": "Shqip, English, Deutsch", "certificate": "", "photo": "" }
+  ],
+  "testimonials": [
+    { "name": "Klient (shembull)", "place_sq": "Blerës, Tiranë", "place_en": "Buyer, Tirana",
+      "text_sq": "Na gjetën apartamentin brenda dy javësh dhe na ndihmuan me kredinë dhe noterin. Gjithçka u bë pa stres.",
+      "text_en": "They found our apartment within two weeks and helped us with the mortgage and the notary. Everything was stress-free." },
+    { "name": "Klient (shembull)", "place_sq": "Pronare, Durrës", "place_en": "Owner, Durrës",
+      "text_sq": "E shitën apartamentin tim me çmimin që kërkoja. Fotot dhe reklamat në Instagram sollën shumë interes.",
+      "text_en": "They sold my apartment at the price I asked. The photos and Instagram ads brought a lot of interest." },
+    { "name": "Klient (shembull)", "place_sq": "Blerës nga diaspora", "place_en": "Buyer from the diaspora",
+      "text_sq": "Jetoj në Itali dhe e bleva shtëpinë në Sarandë pa ardhur shumë herë. Më mbajtën në dijeni për çdo hap në WhatsApp.",
+      "text_en": "I live in Italy and bought my home in Sarandë without travelling back and forth. They kept me updated on WhatsApp at every step." }
+  ]
+}
