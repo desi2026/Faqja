@@ -1,7 +1,7 @@
 {
   "sample": true,
-  "intro_sq": "Jemi një agjenci imobiliare me qendër në Tiranë që punon me apartamente, vila, ambiente biznesi dhe trualle në kryeqytet dhe në bregdet. Çdo pronë që publikojmë e kemi parë vetë dhe ia kemi kontrolluar dokumentet. Na shkruaj në WhatsApp, edhe për pyetje të vogla.",
-  "intro_en": "We are a Tirana-based real estate agency working with apartments, villas, commercial spaces and land in the capital and on the coast. We visit every property we publish and check its documents ourselves. Message us on WhatsApp, even for small questions.",
+  "intro_sq": "ISA Consulting & Properties është një agjenci imobiliare me qendër në Tiranë që punon me apartamente, vila, ambiente biznesi dhe trualle në kryeqytet dhe në bregdet. Çdo pronë që publikojmë e kemi parë vetë dhe ia kemi kontrolluar dokumentet. Na shkruaj në WhatsApp, edhe për pyetje të vogla.",
+  "intro_en": "ISA Consulting & Properties is a Tirana-based real estate agency working with apartments, villas, commercial spaces and land in the capital and on the coast. We visit every property we publish and check its documents ourselves. Message us on WhatsApp, even for small questions.",
   "stats": [
     { "value": "10+", "sq": "vite në tregun e pronave", "en": "years in real estate" },
     { "value": "300+", "sq": "prona të shitura dhe të dhëna me qira", "en": "properties sold and rented" },

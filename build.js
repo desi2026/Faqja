@@ -52,6 +52,8 @@ SITE.brand = String(RAW.brand || "Agjencia").trim();
 SITE.tagline = String(RAW.tagline || "").trim();
 // Full trading name: brand + tagline ("ISA Consulting" + "& Properties"); used where the whole name is shown.
 const FULL_NAME = `${SITE.brand} ${SITE.tagline || "Real Estate"}`;
+// Another name for this agency in Google (alternateName). Not "ISA Consulting" alone: an unrelated IT company in Tirana uses it.
+const ALT_NAMES = ["ISA Properties"];
 
 // Domain: accept "isaproperties.al" or "https://www.isaproperties.al/"; on Netlify the primary domain wins if they differ.
 let SITE_ORIGIN = "https://example.com";
@@ -131,7 +133,7 @@ const OFFICE_MAP = SITE.gbpUrl || (SITE.geo ? `https://www.google.com/maps/searc
   : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${FULL_NAME}, ${SITE.address}`)}`);
 const PRIVACY_DATE = okDate(RAW.privacyUpdated || BUILD_DATE, "data e politikës së privatësisë");
 
-const t = (lang, key, o = {}) => fill(T[lang][key] ?? key, { brand: SITE.brand, ...o });
+const t = (lang, key, o = {}) => fill(T[lang][key] ?? key, { brand: SITE.brand, fullName: FULL_NAME, ...o });
 // Singular/plural: uses "key.one" when n is 1.
 const tn = (lang, key, n, o = {}) => t(lang, n === 1 && T[lang][key + ".one"] != null ? key + ".one" : key, { n, ...o });
 const andList = (arr, lang) => arr.length <= 1 ? arr.join("") : arr.slice(0, -1).join(", ") + " " + t(lang, "and") + " " + arr[arr.length - 1];
@@ -554,7 +556,7 @@ const CSP = [
 
 function layout({ lang, p, alt, key, title: pageTitle, description, image, jsonld = [], body, noindex = false, active = "", extraHead = "", wa = "", waNumber = SITE.whatsapp }) {
   // Like propTitle: drop the " | brand" suffix when the title would be cut in search results.
-  const suffix = ` | ${SITE.brand}`;
+  const suffix = ` | ${FULL_NAME}`;
   if (pageTitle.length > 65 && pageTitle.endsWith(suffix)) pageTitle = pageTitle.slice(0, -suffix.length);
   const other = lang === "sq" ? "en" : "sq";
   const og = image ? ogImg(image) : { url: absImg("/images/og-default.jpg"), sized: true };
@@ -610,6 +612,7 @@ ${og.sized ? `<meta property="og:image:width" content="1200">\n<meta property="o
 <meta name="twitter:card" content="summary_large_image">
 ${SITE.googleSiteVerification ? `<meta name="google-site-verification" content="${esc(SITE.googleSiteVerification)}">` : ""}
 <link rel="icon" href="${rel(p, "favicon.png", false)}" type="image/png" sizes="64x64">
+<link rel="icon" href="${rel(p, "images/icon-192.png", false)}" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="${rel(p, "images/apple-touch-icon.png", false)}">
 <link rel="manifest" href="${rel(p, "site.webmanifest", false)}">
 ${FONTS.map((f) => `<link rel="preload" href="${rel(p, f, false)}" as="font" type="font/woff2" crossorigin>`).join("\n")}
@@ -682,10 +685,12 @@ ${bodyHTML}
 }
 
 /* ---------------------------- JSON-LD ---------------------------- */
+// Google reads WebSite name + alternateName on the home page for the site name shown in results (the domain is a fallback name there).
+const SITE_NAMES = [...new Set([...ALT_NAMES, new URL(DOMAIN).hostname.replace(/^www\./, "")])].filter((n) => n !== FULL_NAME);
 const AGENT = {
   "@context": "https://schema.org", "@type": "RealEstateAgent", "@id": `${DOMAIN}/#agency`,
-  name: FULL_NAME, legalName: SITE.legalName || undefined, taxID: SITE.nipt || undefined,
-  url: `${DOMAIN}/`, logo: abs("images/apple-touch-icon.png"), image: abs("images/og-default.jpg"),
+  name: FULL_NAME, alternateName: ALT_NAMES, description: T.sq["home.desc"].replace("{fullName}", FULL_NAME), legalName: SITE.legalName || undefined, taxID: SITE.nipt || undefined,
+  url: `${DOMAIN}/`, logo: { "@type": "ImageObject", url: abs("images/icon-512.png"), width: 512, height: 512 }, image: abs("images/og-default.jpg"),
   telephone: SITE.phoneDisplay, email: SITE.email, priceRange: "€€",
   address: { "@type": "PostalAddress", streetAddress: SITE.streetAddress || SITE.address, addressLocality: SITE.city || "Tiranë", postalCode: SITE.postalCode || undefined, addressCountry: "AL" },
   geo: SITE.geo ? { "@type": "GeoCoordinates", latitude: SITE.geo.lat, longitude: SITE.geo.lng } : undefined,
@@ -785,12 +790,11 @@ emitBoth("home", {
     const weekNew = ACTIVE.filter((l) => (Date.now() - new Date(l.added)) / 864e5 <= 7).length;
     return {
       title: t(lang, "home.title"), description: t(lang, "home.desc"),
-      jsonld: [AGENT, { "@context": "https://schema.org", "@type": "WebSite", name: FULL_NAME, url: abs(R.home(lang)), inLanguage: lang, publisher: { "@id": `${DOMAIN}/#agency` } }, itemList(ACTIVE, lang)],
+      jsonld: [AGENT, { "@context": "https://schema.org", "@type": "WebSite", name: FULL_NAME, alternateName: SITE_NAMES, url: `${DOMAIN}/`, inLanguage: lang, publisher: { "@id": `${DOMAIN}/#agency` } }, itemList(ACTIVE, lang)],
       body: `<section class="hero">
   <svg class="hero-lines" viewBox="0 0 520 320" aria-hidden="true" fill="none" stroke="#C9A55A" stroke-width="1.2"><path d="M20 320V140h70v180M90 320V80h90v240M180 320V180h60v140M240 320V40h110v280M350 320V120h80v200M430 320V200h70v120"/><path d="M260 60h70M260 90h70M260 120h70M260 150h70M260 180h70M260 210h70M260 240h70M260 270h70M110 110h50M110 140h50M110 170h50M110 200h50M110 230h50M110 260h50M370 150h40M370 180h40M370 210h40M370 240h40M370 270h40"/></svg>
   <div class="wrap">
-    <span class="eyebrow on-navy">${t(lang, "hero.eyebrow")}</span>
-    <h1>${t(lang, "hero.title")}</h1>
+    <h1><span class="eyebrow on-navy">${esc(FULL_NAME)} · ${t(lang, "hero.eyebrow")}</span><span class="hero-title">${t(lang, "hero.title")}</span></h1>
     <p class="sub">${t(lang, "hero.sub")}</p>
     <form class="search" data-search role="search" method="get" action="#listings">
       <label><span>${t(lang, "f.deal")}</span><select name="deal"><option value="all">${t(lang, "f.dealAny")}</option><option value="sale">${t(lang, "deal.sale")}</option><option value="rent">${t(lang, "deal.rent")}</option></select></label>
@@ -976,7 +980,7 @@ for (const a of Object.values(AREAS)) {
 // Properties
 function propTitle(l, lang) {
   const name = title(l, lang), zn = zoneName(l.zone, lang), place = placeOf(l.zone, lang);
-  const brand = ` | ${SITE.brand}`;
+  const brand = ` | ${FULL_NAME}`;
   if (isClosed(l)) {
     const head = `${t(lang, "status." + l.status)}: ${name}`;
     return [head + ` – ${place}` + brand, head + ` – ${zn}` + brand, head + brand, head].find((x) => x.length <= 65) || head;
@@ -1293,7 +1297,7 @@ for (const a of ARTICLES) {
       const name = artTitle(a, lang), body = a[`body_${lang}`] || a.body_sq;
       const others = ARTICLES.filter((x) => x !== a).slice(0, 3);
       return {
-        title: `${name} | ${SITE.brand}`.length <= 65 ? `${name} | ${SITE.brand}` : name, description: a[`excerpt_${lang}`] || "", image: a.image,
+        title: `${name} | ${FULL_NAME}`.length <= 65 ? `${name} | ${FULL_NAME}` : name, description: a[`excerpt_${lang}`] || "", image: a.image,
         extraHead: `<meta property="article:published_time" content="${esc(a.date)}">${a.updated ? `\n<meta property="article:modified_time" content="${esc(a.updated)}">` : ""}`,
         jsonld: [{ "@context": "https://schema.org", "@type": "BlogPosting", headline: name, description: a[`excerpt_${lang}`] || "", inLanguage: lang,
           datePublished: a.date, dateModified: a.updated || a.date, image: a.image && absImg(a.image) ? [absImg(a.image)] : undefined, mainEntityOfPage: abs(p),
@@ -1320,7 +1324,7 @@ ${others.length ? `<section class="section pt0"><div class="wrap"><h2 class="sub
 if (!PREVIEW) {
   const idMap = Object.fromEntries(LISTINGS.map((l) => [l.id, { sq: "/" + R.prop("sq", l), en: "/" + R.prop("en", l) }]));
   write("404.html", layout({ lang: "sq", p: "", alt: null, key: "404", noindex: true,
-    title: `${t("sq", "nf.title")} | ${SITE.brand}`, description: t("sq", "nf.text"),
+    title: `${t("sq", "nf.title")} | ${FULL_NAME}`, description: t("sq", "nf.text"),
     body: `<section class="page-hero nf"><div class="wrap"><span class="eyebrow on-navy">404</span><h1>${t("sq", "nf.title")}</h1><p class="sub">${t("sq", "nf.text")}</p>
 <p class="sub" lang="en">${t("en", "nf.title")}. ${t("en", "nf.text")}</p>
 <p><a class="btn-gold" href="./">${t("sq", "nf.cta")}</a></p></div></section>
@@ -1340,7 +1344,7 @@ ${pg.lastmod ? `    <lastmod>${pg.lastmod}</lastmod>\n` : ""}${LANGS.map((L) => 
 `);
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /admin/\n\nSitemap: ${DOMAIN}/sitemap.xml\n`);
 write("site.webmanifest", JSON.stringify({ name: FULL_NAME, short_name: SITE.brand, start_url: "/", display: "standalone",
-  background_color: "#0F1A3E", theme_color: "#0F1A3E", icons: [{ src: "/images/apple-touch-icon.png", sizes: "180x180", type: "image/png" }, { src: "/images/icon-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
+  background_color: "#0F1A3E", theme_color: "#0F1A3E", icons: [{ src: "/images/apple-touch-icon.png", sizes: "180x180", type: "image/png" }, { src: "/images/icon-192.png", sizes: "192x192", type: "image/png" }, { src: "/images/icon-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
 // Short links by property code (isaproperties.al/101, isaproperties.al/en/101) for Instagram bios, phone calls and print.
 if (!PREVIEW) write("_redirects", LISTINGS.map((l) => `/${l.id} /${R.prop("sq", l)} 301\n/en/${l.id} /${R.prop("en", l)} 301`).join("\n") + "\n");
 

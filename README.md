@@ -15,7 +15,7 @@ Faqe statike dygjuhëshe (shqip / anglisht) me SEO të plotë. Nuk ka nevojë p�
 | Artikujt (udhëzuesit) | `content/articles/*.json` | Artikujt |
 | Tekstet e faqes | `src/i18n.js` | – (zhvilluesi) |
 | Politika e privatësisë | `src/privacy.js` | – (zhvilluesi) |
-| Logoja, ikona e faqes, foto e ndarjes | `static/images/brand/logo-mark.webp`, `static/favicon.png`, `static/images/apple-touch-icon.png`, `static/images/icon-512.png`, `static/images/og-default.jpg` | – (zhvilluesi) |
+| Logoja, ikona e faqes, foto e ndarjes | `static/images/brand/logo-mark.webp`, `static/favicon.png`, `static/favicon.ico`, `static/images/apple-touch-icon.png`, `static/images/icon-192.png`, `static/images/icon-512.png` (edhe logoja për Google), `static/images/og-default.jpg` | – (zhvilluesi) |
 
 **Të dhënat aktuale janë shembuj:** 15 pronat (101–115) me fotot e vizatuara, ekipi, shifrat, vlerësimet dhe tarifat.
 Para publikimit fshi pronat shembull, vendos të dhënat reale dhe hiq shenjën "Shfaq shënimin 'shembull'"
