@@ -40,6 +40,7 @@ collections:
       - { label: "Me qira", field: deal, pattern: rent }
       - { label: "Të lira", field: status, pattern: available }
       - { label: "Të shitura / dhëna me qira", field: status, pattern: "sold|rented" }
+      - { label: "Të fshehura (p.sh. nga Instagram, për t'u plotësuar)", field: hidden, pattern: true }
     view_groups:
       - { label: "Zona", field: zone }
       - { label: "Statusi", field: status }
@@ -111,6 +112,7 @@ collections:
           - { label: "Depo / bodrum", value: storage }
       - { label: "Video ose tur virtual (link i plotë: YouTube, Instagram ose Matterport)", name: video, widget: string, required: false, pattern: ["^(https://\\S+)?$", "Linku duhet të fillojë me https://"] }
       - { label: "Fshih plotësisht nga faqja", name: hidden, widget: boolean, required: false, default: false }
+      - { label: "Shënim i brendshëm (nuk del në faqe)", name: note, widget: text, required: false, hint: "Pronat nga Instagram-i shkruajnë këtu linkun e postimit dhe çfarë mungon. Plotëso të dhënat, hiq 'Fshih' dhe publiko." }
 
   - name: artikuj
     label: Artikujt

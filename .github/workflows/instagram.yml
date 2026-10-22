@@ -1,0 +1,92 @@
+# Instagram → pronat. Every hour it reads the agency's new Instagram posts and saves each property post
+# as a property of the site (scripts/instagram-import.js; caption template and setup in README → Instagram).
+# Until the IG_ACCESS_TOKEN secret exists it does nothing.
+name: Instagram
+
+on:
+  schedule:
+    - cron: "17 * * * *" # every hour (GitHub may start it some minutes late)
+    - cron: "41 3 * * 1" # Mondays: renew the Instagram key before its 60 days run out
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "import = merr postimet e reja · preview = vetëm trego si lexohen 5 postimet e fundit · refresh = rifresko çelësin"
+        type: choice
+        options: [import, preview, refresh]
+        default: import
+      since:
+        description: "Opsionale, vetëm me import: merr edhe postimet që nga kjo datë (VVVV-MM-DD)"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram
+  cancel-in-progress: false
+
+jobs:
+  instagram:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      IG_USER_ID: ${{ vars.IG_USER_ID }}
+      IG_GRAPH_HOST: ${{ vars.IG_GRAPH_HOST }}
+      IG_MODE: ${{ inputs.mode || (github.event.schedule == '41 3 * * 1' && 'refresh') || 'import' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Merr postimet e reja
+        id: ig
+        if: env.IG_MODE != 'refresh'
+        env:
+          IG_SINCE: ${{ inputs.since }}
+          IG_COMMIT_MSG_FILE: ${{ runner.temp }}/ig-commit-msg
+        run: |
+          if [ "$IG_MODE" = "preview" ]; then
+            node scripts/instagram-import.js --preview 5
+          else
+            node scripts/instagram-import.js
+          fi
+
+      - name: Ruaj pronat në GitHub
+        if: steps.ig.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- data/listings data/instagram.json
+          if [ -d static/images/uploads ]; then git add -A -- static/images/uploads; fi
+          git commit -q -F "$RUNNER_TEMP/ig-commit-msg"
+          for attempt in 1 2 3; do
+            if ! git pull -q --rebase origin main; then
+              git rebase --abort || true
+              echo "::error::Dikush ndryshoi të njëjtat prona në panel në të njëjtën kohë. Asgjë nuk u ruajt; provohet sërish në orën tjetër."
+              exit 1
+            fi
+            node scripts/instagram-import.js --check
+            if git push -q origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 15))
+          done
+          exit 1
+
+      - name: Rifresko çelësin e Instagram-it
+        if: env.IG_MODE == 'refresh'
+        env:
+          GH_TOKEN: ${{ secrets.IG_SECRETS_PAT }}
+        run: |
+          if [ -z "$IG_ACCESS_TOKEN" ]; then echo "Instagram nuk është lidhur ende."; exit 0; fi
+          if [ -n "$IG_GRAPH_HOST" ] && [ "$IG_GRAPH_HOST" != "graph.instagram.com" ]; then echo "Lidhja përmes Facebook-ut nuk ka nevojë për rifreskim."; exit 0; fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Mungon sekreti IG_SECRETS_PAT, ndaj çelësi i Instagram-it nuk rifreskohet dhe skadon 60 ditë pasi u krijua (README → Instagram)."
+            exit 1
+          fi
+          umask 077
+          node scripts/instagram-import.js --refresh-token "$RUNNER_TEMP/ig-token"
+          echo "::add-mask::$(cat "$RUNNER_TEMP/ig-token")"
+          gh secret set IG_ACCESS_TOKEN --repo "$GITHUB_REPOSITORY" < "$RUNNER_TEMP/ig-token"
+          rm -f "$RUNNER_TEMP/ig-token"
+          echo "Çelësi i ri u ruajt te GitHub → Settings → Secrets."

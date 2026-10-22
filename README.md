@@ -8,7 +8,7 @@ Faqe statike dygjuhëshe (shqip / anglisht) me SEO të plotë. Nuk ka nevojë p�
 | Çfarë | Skedari | Te paneli (/admin) |
 |---|---|---|
 | Emri, emri ligjor, NIPT, ndërmjetësi, telefoni, WhatsApp, email, adresa, orari, Instagram, Facebook, Google, domeni | `data/site.json` | Cilësimet → Agjencia dhe kontaktet |
-| Pronat (një skedar për pronë: `data/listings/101.json` …) | `data/listings/` | Pronat |
+| Pronat (një skedar për pronë: `data/listings/101.json` …); edhe automatikisht nga Instagram-i (shih **Instagram** më poshtë) | `data/listings/` | Pronat |
 | Kushtet dhe tarifat (faqja `/kushtet-dhe-tarifat/`) | `data/terms.json` | Cilësimet → Kushtet dhe tarifat |
 | Zonat, grupet (Tiranë, Bregdeti) dhe tekstet e tyre | `data/zones.json` | Cilësimet → Zonat |
 | Rreth nesh, ekipi, shifrat, vlerësimet e klientëve | `data/about.json` | Cilësimet → Rreth nesh, ekipi dhe vlerësimet |
@@ -108,6 +108,71 @@ Llogaritë (domeni, GitHub, Netlify, Google) hapen me email-in dhe kartën e kli
    `generate_lead` (Pixel `Lead`, për të dy formularët), `search`, `search_code`, `add_to_wishlist`.
 4. **Linqet e shkurtra** `domeni/101` dhe `domeni/en/101` çojnë te prona me atë kod: përdori në Instagram, në telefon dhe në printime.
 
+## Instagram → pronat (automatikisht)
+
+Çdo orë GitHub lexon postimet e reja të llogarisë së Instagram-it dhe çdo postim prone e shton te faqja
+(`scripts/instagram-import.js`, puna `.github/workflows/instagram.yml`). Është falas te GitHub (repository publike);
+çdo pronë që del online është një publikim te Netlify (15 kredite), si te paneli. Pa sekretin `IG_ACCESS_TOKEN` nuk bën asgjë.
+
+### Si shkruhet postimi
+
+```
+Apartament 2+1 me pamje nga Parku i Madh
+Shitje
+Zona: Blloku
+Lloji: Apartament
+Çmimi: 185.000 €
+2+1 · 110 m² · kati 6/9
+Banjo: 2
+Karakteristika: ashensor, parkim, ballkon, ngrohje qendrore
+Hipoteka: po
+
+Përshkrimi i lirë, sa rreshta të duash.
+
+#isaproperties #tirana
+```
+
+- **Rreshti i parë** është titulli. **"Shitje"** ose **"Qira"** shkruhet në rresht më vete (vlen edhe "Shitet …" / "Jepet me qira …" në fillim të titullit).
+- **Zona** me emrin si te lista e zonave (Blloku, Komuna e Parisit, Liqeni i Thatë, Qendër, Kodra e Diellit, Astir, Durrës, Golem, Vlorë, Sarandë, Ksamil);
+  vlen edhe rreshti `📍 Blloku, Tiranë`. **Lloji:** apartament / garsonierë, vilë / shtëpi, zyrë / dyqan / ambient, truall.
+- **Çmimi** si `185.000 €`, `185k`, `1,2 mln` ose "me marrëveshje"; për qiranë çmimi për muaj.
+- Opsionale: `Kodi: 120` (përndryshe merr kodin e radhës), `Neto:`, `Truall:`, `Gjendja:`, `Viti:`, `Deti: 300 m`, `Orientimi:`,
+  `Depozita: 2 muaj`, `Afati: 1 vit`, `E lirë nga: 01.12.2026`, `Statusi: e rezervuar / e shitur`, `Agjenti:` (si te ekipi),
+  `Video:` (link), `Përshkrimi:` (çdo gjë pas tij është përshkrim).
+- Numrat e telefonit, `@emrat`, hashtag-et dhe emojit nuk kalojnë në faqe. Rreshtat me shkronja të mëdha kthehen në shkrim normal.
+- Fotot e postimit (deri në 20) bëhen fotot e pronës, pa të dhënat e kamerës. Te një video merret kopertina, dhe videoja lidhet te prona.
+- Titulli dhe përshkrimi në anglisht krijohen vetë nga të dhënat; mund të përmirësohen te paneli.
+
+### Çfarë ndodh
+
+- **Postim i plotë** (shitje/qira, lloji, zona, të paktën një foto): del online brenda orës.
+- **Postim i paplotë:** ruhet **i fshehur**. Te paneli → Pronat → filtri *Të fshehura* → hape: te *Shënim i brendshëm* shkruhet çfarë mungon.
+  Plotësoje, hiq *Fshih plotësisht nga faqja* dhe kliko *Publish*.
+- **Postimet që nuk janë prona** (urime, ekipi) anashkalohen: postim prone është ai me rreshtin "Shitje"/"Qira", me `Kodi:`, ose me `Zona:` dhe `Çmimi:`.
+- **Ndryshimi i përshkrimit** në Instagram përditëson pronën; **fshirja e postimit** e fsheh pronën. Por pasi prona ruhet një herë te paneli,
+  **paneli fiton** dhe Instagram-i nuk e prek më.
+- Kur prona shitet ose jepet me qira, ndrysho *Statusi* te paneli (ose shto `Statusi: e shitur` te përshkrimi i postimit).
+- Merren vetëm postimet pas lidhjes. Për postimet e vjetra: GitHub → Actions → Instagram → Run workflow → `since` = data (VVVV-MM-DD).
+  Postimet më të vjetra se 180 ditë nuk ndiqen më (ndryshimet e tyre bëhen te paneli).
+- `data/instagram.json` mban mend cili postim u bë cila pronë. Mos e ndrysho me dorë.
+- Nëse puna dështon (p.sh. çelësi skadoi), GitHub dërgon email dhe te Actions → Instagram shihet arsyeja në shqip.
+
+### Lidhja (një herë)
+
+1. **Instagram:** llogaria duhet të jetë *Professional* (Business ose Creator) dhe publike.
+2. **Meta:** te developers.facebook.com krijo një app të tipit *Business* → shto produktin *Instagram* →
+   *API setup with Instagram login* → shto llogarinë e Instagram-it → *Generate token*. Çelësi vlen 60 ditë.
+   App-i mbetet në *Development mode*; nuk duhet App Review, sepse lexon vetëm llogarinë e vet.
+3. **GitHub** → Settings → Secrets and variables → Actions → *New repository secret*: `IG_ACCESS_TOKEN` = çelësi.
+4. **Rifreskimi automatik i çelësit** (çdo të hënë): krijo te GitHub (llogaria personale) → Settings → Developer settings →
+   Fine-grained tokens një token vetëm për këtë repository me *Secrets: Read and write*, dhe ruaje si sekret `IG_SECRETS_PAT`.
+   Pa të, çelësi i Instagram-it skadon pas 60 ditësh dhe duhet krijuar sërish me dorë.
+5. **Prova:** Actions → Instagram → Run workflow → `preview`. Tregon si lexohen 5 postimet e fundit, pa ndryshuar asgjë.
+6. **Nëse prova thotë që nuk vijnë përshkrimet**, përdoret lidhja përmes Facebook-ut: Instagram-i lidhet me një faqe Facebook,
+   te app-i shtohet *Instagram API with Facebook login* (lejet `instagram_basic`, `pages_show_list`, `pages_read_engagement`),
+   te Actions → Variables vendos `IG_GRAPH_HOST` = `graph.facebook.com` dhe `IG_USER_ID` = ID-ja e llogarisë së Instagram-it,
+   dhe si `IG_ACCESS_TOKEN` vendos *Page access token*-in e faqes (i marrë nga një token afatgjatë, nuk skadon).
+
 ## Çfarë përfshin
 
 - Faqe më vete për çdo pronë, zonë, grup zonash (Tiranë, Bregdeti), "në shitje / me qira" për çdo grup, artikull, hartën, "Rreth nesh",
@@ -127,4 +192,6 @@ Llogaritë (domeni, GitHub, Netlify, Google) hapen me email-in dhe kartën e kli
 ```
 node build.js            # versioni për Netlify → dist/
 node build.js --preview  # versioni për pamjen paraprake → dist-preview/
+node scripts/instagram-import.js --check      # kontrollon që kodet e pronave të jenë unike
+node scripts/instagram-import.js --preview 5  # si lexohen 5 postimet e fundit (me IG_ACCESS_TOKEN), pa ndryshuar asgjë
 ```
