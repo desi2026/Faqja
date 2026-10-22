@@ -30,7 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
       IG_USER_ID: ${{ vars.IG_USER_ID }}
       IG_GRAPH_HOST: ${{ vars.IG_GRAPH_HOST }}
       IG_MODE: ${{ inputs.mode || (github.event.schedule == '41 3 * * 1' && 'refresh') || 'import' }}
@@ -44,6 +43,7 @@ jobs:
         id: ig
         if: env.IG_MODE != 'refresh'
         env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_SINCE: ${{ inputs.since }}
           IG_COMMIT_MSG_FILE: ${{ runner.temp }}/ig-commit-msg
         run: |
@@ -73,9 +73,17 @@ jobs:
           done
           exit 1
 
+      # A post that could not be imported, or a key that looks wrong: GitHub emails a failed run.
+      - name: Njofto problemet
+        if: steps.ig.outputs.failed == 'true'
+        run: |
+          echo "::error::Disa postime nuk u kthyen në prona ose çelësi duket i gabuar. Shiko përmbledhjen e kësaj pune."
+          exit 1
+
       - name: Rifresko çelësin e Instagram-it
         if: env.IG_MODE == 'refresh'
         env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           GH_TOKEN: ${{ secrets.IG_SECRETS_PAT }}
         run: |
           if [ -z "$IG_ACCESS_TOKEN" ]; then echo "Instagram nuk është lidhur ende."; exit 0; fi

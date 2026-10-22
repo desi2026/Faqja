@@ -135,8 +135,8 @@ Përshkrimi i lirë, sa rreshta të duash.
 - **Rreshti i parë** është titulli. **"Shitje"** ose **"Qira"** shkruhet në rresht më vete (vlen edhe "Shitet …" / "Jepet me qira …" në fillim të titullit).
 - **Zona** me emrin si te lista e zonave (Blloku, Komuna e Parisit, Liqeni i Thatë, Qendër, Kodra e Diellit, Astir, Durrës, Golem, Vlorë, Sarandë, Ksamil);
   vlen edhe rreshti `📍 Blloku, Tiranë`. **Lloji:** apartament / garsonierë, vilë / shtëpi, zyrë / dyqan / ambient, truall.
-- **Çmimi** si `185.000 €`, `185k`, `1,2 mln` ose "me marrëveshje"; për qiranë çmimi për muaj.
-- Opsionale: `Kodi: 120` (përndryshe merr kodin e radhës), `Neto:`, `Truall:`, `Gjendja:`, `Viti:`, `Deti: 300 m`, `Orientimi:`,
+- **Çmimi** në euro, si `185.000 €`, `185k`, `1,2 mln` ose "me marrëveshje"; për qiranë çmimi për muaj. Çmimi në lekë ose për m² nuk merret (prona mbetet e fshehur).
+- Opsionale: `Kodi: 120` (përndryshe merr kodin e radhës nga **1001** e lart, që të mos përplaset me kodet që shkruhen te paneli), `Neto:`, `Truall:`, `Gjendja:`, `Viti:`, `Deti: 300 m`, `Orientimi:`,
   `Depozita: 2 muaj`, `Afati: 1 vit`, `E lirë nga: 01.12.2026`, `Statusi: e rezervuar / e shitur`, `Agjenti:` (si te ekipi),
   `Video:` (link), `Përshkrimi:` (çdo gjë pas tij është përshkrim).
 - Numrat e telefonit, `@emrat`, hashtag-et dhe emojit nuk kalojnë në faqe. Rreshtat me shkronja të mëdha kthehen në shkrim normal.
@@ -149,13 +149,18 @@ Përshkrimi i lirë, sa rreshta të duash.
 - **Postim i paplotë:** ruhet **i fshehur**. Te paneli → Pronat → filtri *Të fshehura* → hape: te *Shënim i brendshëm* shkruhet çfarë mungon.
   Plotësoje, hiq *Fshih plotësisht nga faqja* dhe kliko *Publish*.
 - **Postimet që nuk janë prona** (urime, ekipi) anashkalohen: postim prone është ai me rreshtin "Shitje"/"Qira", me `Kodi:`, ose me `Zona:` dhe `Çmimi:`.
+  Edhe postimet "E SHITUR" / "U dha me qira" nuk bëhen prona të reja.
+- **Ripostim i një prone** me `Kodi:` të një prone që ekziston (p.sh. reel ose ulje çmimi): ruhet i fshehur, që prona të mos dalë dy herë.
 - **Ndryshimi i përshkrimit** në Instagram përditëson pronën; **fshirja e postimit** e fsheh pronën. Por pasi prona ruhet një herë te paneli,
   **paneli fiton** dhe Instagram-i nuk e prek më.
-- Kur prona shitet ose jepet me qira, ndrysho *Statusi* te paneli (ose shto `Statusi: e shitur` te përshkrimi i postimit).
+- Kur prona shitet ose jepet me qira, ndrysho *Statusi* te paneli, ose ndrysho përshkrimin e postimit që të fillojë me "E SHITUR" / "U DHA ME QIRA".
 - Merren vetëm postimet pas lidhjes. Për postimet e vjetra: GitHub → Actions → Instagram → Run workflow → `since` = data (VVVV-MM-DD).
   Postimet më të vjetra se 180 ditë nuk ndiqen më (ndryshimet e tyre bëhen te paneli).
 - `data/instagram.json` mban mend cili postim u bë cila pronë. Mos e ndrysho me dorë.
-- Nëse puna dështon (p.sh. çelësi skadoi), GitHub dërgon email dhe te Actions → Instagram shihet arsyeja në shqip.
+- Nëse puna dështon (p.sh. çelësi skadoi, ose një postim nuk u kthye dot në pronë pas 6 provash), GitHub dërgon email
+  dhe te Actions → Instagram shihet arsyeja në shqip. Një postim që dështoi provohet sërish kur i ndryshohet përshkrimi.
+- Nëse shumë postime duken të fshira njëherësh, pronat fshihen vetëm pasi kontrollohet që Instagram-i lexohet saktë.
+  Nëse çelësi është për një llogari tjetër, puna ndalon pa ndryshuar asgjë.
 
 ### Lidhja (një herë)
 
@@ -167,6 +172,7 @@ Përshkrimi i lirë, sa rreshta të duash.
 4. **Rifreskimi automatik i çelësit** (çdo të hënë): krijo te GitHub (llogaria personale) → Settings → Developer settings →
    Fine-grained tokens një token vetëm për këtë repository me *Secrets: Read and write*, dhe ruaje si sekret `IG_SECRETS_PAT`.
    Pa të, çelësi i Instagram-it skadon pas 60 ditësh dhe duhet krijuar sërish me dorë.
+   Edhe ky token i GitHub-it ka datë skadimi (përveç "No expiration"): krijo një të ri para asaj date, se ndryshe rifreskimi ndalon.
 5. **Prova:** Actions → Instagram → Run workflow → `preview`. Tregon si lexohen 5 postimet e fundit, pa ndryshuar asgjë.
 6. **Nëse prova thotë që nuk vijnë përshkrimet**, përdoret lidhja përmes Facebook-ut: Instagram-i lidhet me një faqe Facebook,
    te app-i shtohet *Instagram API with Facebook login* (lejet `instagram_basic`, `pages_show_list`, `pages_read_engagement`),

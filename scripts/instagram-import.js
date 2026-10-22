@@ -33,6 +33,8 @@ const PUBLIC_DIR = "/images/uploads";
 const STATE_FILE = "data/instagram.json";
 const MAX_PHOTOS = 20;
 const MAX_TRIES = 6; // a post whose photos keep failing is retried for about six hours, then reported
+const FIRST_CODE = 1001; // Instagram codes start here, so they never clash with codes typed in the panel (101, 102 …)
+const MAX_HIDE = 3; // above this many "deleted" posts in one run, a post that is still there is checked first
 const WINDOW_DAYS = 180; // edits and deletions of posts older than this are no longer followed (the panel is used for those)
 
 const env = process.env;
@@ -57,6 +59,8 @@ function write(p, data) {
   fs.writeFileSync(abs(p), data);
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// Messages end up in public places (Actions log, commit message, data/instagram.json), so the key never appears in them.
+const scrub = (m) => (TOKEN ? String(m).split(TOKEN).join("***") : String(m));
 const log = (m) => console.log(m);
 
 // Every listing file and its code. Codes must be whole numbers above 0 and unique (build.js stops otherwise).
@@ -81,7 +85,7 @@ const fold = (s) => String(s || "").toLowerCase().replace(/ë/g, "e").replace(/�
 const EMOJI = /[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}‍︎️⃣]/gu;
 const stripEmoji = (s) => String(s || "").replace(EMOJI, "").replace(/[ \t]{2,}/g, " ").trim();
 // Leading bullets, emojis and dashes ("📍 Zona: Blloku", "• 2+1", "– Kati 4").
-const stripLead = (s) => stripEmoji(s).replace(/^[^\p{L}\p{N}+\-]+/u, "").replace(/^[-–—]\s+/, "").trim();
+const stripLead = (s) => stripEmoji(s).replace(/^[^\p{L}\p{N}+\-€]+/u, "").replace(/^[-–—]\s+/, "").trim();
 const isHashtagLine = (s) => /^([#@][\p{L}\p{N}_.]+[\s,.]*)+$/u.test(s.trim());
 const PHONE = /(\+\s?355|\b0)\s?6[6-9][\d\s.\-]{6,}/;
 const cleanHashtags = (s) => s.replace(/(\s*#[\p{L}\p{N}_]+)+\s*$/u, "").replace(/#([\p{L}\p{N}_]+)/gu, "$1").trim();
@@ -99,7 +103,7 @@ function cut(s, max) {
 }
 const int = (v) => { const m = String(v).match(/-?\d+/); return m ? Number(m[0]) : undefined; };
 function num(v) {
-  const m = String(v).replace(/(\d)[.\s'](?=\d{3}\b)/g, "$1").match(/\d+(?:[.,]\d+)?/);
+  const m = String(v).replace(/(\d)[.,\s'](?=\d{3}\b)/g, "$1").match(/\d+(?:[.,]\d+)?/);
   return m ? Number(m[0].replace(",", ".")) : undefined;
 }
 
@@ -174,16 +178,22 @@ function featuresOf(v, notes) {
   }
   return out;
 }
+// "185.000 €", "€185.000", "120.000,00 €", "145,000", "85 000", "185k", "1,2 mln", "me marrëveshje".
+// The number right next to € wins, so "110 m², 185.000 €" is 185000. Prices in lek or per m² are not taken.
+const NUM = String.raw`(\d{1,3}(?:[.\s']\d{3})+(?:,\d{1,2})?|\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+(?:[.,]\d+)?)`;
+const MULT = String.raw`(?:\s*(k|mije|mij|mln|milion|million)\b)?`;
+const PRICE_RES = [new RegExp(NUM + MULT + String.raw`\s*(?:€|eur)`), new RegExp(String.raw`(?:€|eur\w*)\s*` + NUM + MULT), new RegExp(NUM + MULT)];
 function priceOf(v) {
   const f = fold(v);
   if (!/\d/.test(f)) return /marreveshje|negocio|kontakt|telefon|inbox|privat|\bdm\b/.test(f) ? { none: true } : null;
-  const m = f.match(/(\d[\d\s.,']*)(\s*(?:k\b|mije|mij\b|mln|milion|million))?/);
+  if (/\blek|\d\s*all\b/.test(f)) return { bad: "është në lekë" };
+  if (/\/\s*m(2|²|q)|\bper m(2|²|eter|q)/.test(f)) return { bad: "duket çmim për m²" };
+  const m = PRICE_RES.map((re) => f.match(re)).find(Boolean);
   if (!m) return null;
-  const s = m[1].replace(/[\s']/g, "").replace(/[.,]+$/, "");
-  let n;
-  if (/^\d{1,3}([.,]\d{3})+$/.test(s)) n = Number(s.replace(/[.,]/g, ""));
-  else if (/^\d+[.,]\d{1,2}$/.test(s)) n = Number(s.replace(",", "."));
-  else n = Number(s.replace(/[.,]/g, ""));
+  let t = m[1].replace(/[\s']/g, ""), n;
+  if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) n = Number(t.replace(/,\d+$/, "").replace(/\./g, ""));
+  else if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)) n = Number(t.replace(/\.\d+$/, "").replace(/,/g, ""));
+  else n = Number(t.replace(",", "."));
   if (m[2]) n *= /mln|milion|million/.test(m[2]) ? 1e6 : 1000;
   n = Math.round(n);
   return n > 0 ? { value: n } : null;
@@ -232,12 +242,13 @@ const isSpecLine = (s) => {
   return f.length < 90 && /^(\d|kati\b)/.test(f) && /\d\s*\+\s*\d|m2|m²|mq\b|\bkati\b|banjo|dhoma gjumi/.test(f);
 };
 // "💶 145.000 €" written without "Çmimi:".
-const isPriceLine = (s) => { const f = fold(s); return f.length < 40 && /\d/.test(f) && /(€|\beur\b|\beuro\b)/.test(f); };
+const isPriceLine = (s) => { const f = fold(s); return f.length < 40 && /\d/.test(f) && /(€|\beur\b|\beuro\b|\blek)/.test(f); };
 // "📍 Blloku, Tiranë": a location line.
 const PIN = /^\s*(?:\u{1F4CD}|\u{1F4CC}|\u{1F5FA})/u;
 // A first line such as "Shitet apartament 2+1" or "Jepet me qira vilë" also says the deal.
 function titleDeal(s) {
   const f = fold(s);
+  if (/\b(shitje|shitet)\b/.test(f) && /\b(qira|qera)\b/.test(f)) return ""; // "Shitje / Qira": unclear
   if (/^(shitet|shes|ne shitje|per shitje|shitje)\b/.test(f)) return "sale";
   if (/^(jepet me qira|jepet me qera|jap me qira|me qira|per qira|qira)\b/.test(f)) return "rent";
   return "";
@@ -249,14 +260,15 @@ function parseCaption(caption, ctx) {
   const free = []; // [{ text, blank, desc }]
   const raw = {};
   const specLines = [], locLines = [];
-  let descMode = false, dealLine = "", dealTag = "", priceLine = "";
+  let descMode = false, dealLine = "", priceLine = "";
+  const tags = new Set();
   for (const rawLine of String(caption || "").replace(/\r/g, "").split("\n")) {
     const bare = stripEmoji(rawLine);
     if (bare && isHashtagLine(bare)) {
       for (const tag of bare.match(/#[\p{L}\p{N}_]+/gu) || []) {
         const t = fold(tag.slice(1));
-        if (DEAL_TAGS.sale.includes(t)) dealTag = dealTag || "sale";
-        if (DEAL_TAGS.rent.includes(t)) dealTag = dealTag || "rent";
+        if (DEAL_TAGS.sale.includes(t)) tags.add("sale");
+        if (DEAL_TAGS.rent.includes(t)) tags.add("rent");
       }
       continue;
     }
@@ -269,7 +281,7 @@ function parseCaption(caption, ctx) {
     const f = fold(line).replace(/[^a-z ]/g, "").trim();
     if (!descMode && DEAL_LINES.sale.includes(f)) { dealLine = dealLine || "sale"; continue; }
     if (!descMode && DEAL_LINES.rent.includes(f)) { dealLine = dealLine || "rent"; continue; }
-    if (!descMode && isSpecLine(line)) { specLines.push(line); if (isPriceLine(line.replace(/^.*?(\d[\d.,\s]*\s*(€|eur))/i, "$1"))) priceLine = priceLine || line; continue; }
+    if (!descMode && isSpecLine(line)) { specLines.push(line); if (/€|\beur/i.test(line)) priceLine = priceLine || line; continue; }
     if (!descMode && PIN.test(rawLine)) { locLines.push(line); continue; }
     if (!descMode && !priceLine && isPriceLine(line)) { priceLine = line; continue; }
     free.push({ text: line, desc: descMode });
@@ -281,6 +293,10 @@ function parseCaption(caption, ctx) {
   const titleLine = raw.title || (firstFree >= 0 ? free[firstFree].text : "");
   const descLines = free.filter((x, i) => raw.title || i !== firstFree);
   const fromTitle = titleDeal(titleLine);
+  const dealTag = tags.size === 1 ? [...tags][0] : ""; // "#shitje #qira" says nothing
+  // "E SHITUR!" / "U dha me qira": news about a property, not a new one (an edited caption marks the property sold).
+  const done = fold(titleLine).match(/\b(e shitur|u shit\w*|shitur|sold|u dha me qira|e dhene me qira|rented)\b/);
+  if (done) { r.isProperty = false; r.closed = /qira|rented/.test(done[0]) ? "rented" : "sold"; return r; }
   r.isProperty = Boolean(dealLine || raw.deal || raw.code || (raw.zone && raw.price)
     || ((fromTitle || dealTag) && (raw.zone || raw.price || locLines.length || priceLine || specLines.length)));
   if (!r.isProperty) return r;
@@ -302,10 +318,11 @@ function parseCaption(caption, ctx) {
   }
   if (raw.price !== undefined) {
     const p = priceOf(raw.price);
-    if (p && p.value) out.price = p.value; else if (!p) notes.push(`çmimi „${raw.price}” nuk u kuptua`);
-  } else if (priceLine) {
-    const p = priceOf(priceLine.replace(/^.*?(\d[\d.,\s']*\s*(?:k|mije|mln|milion)?\s*(?:€|eur))/i, "$1"));
     if (p && p.value) out.price = p.value;
+    else if (!p || p.bad) { notes.push(`çmimi „${raw.price}” ${p ? p.bad : "nuk u kuptua"}, ndaj nuk u vendos`); out.priceUnclear = true; }
+  } else if (priceLine) {
+    const p = priceOf(priceLine);
+    if (p && p.value) out.price = p.value; else if (p && p.bad) { notes.push(`çmimi „${priceLine}” ${p.bad}, ndaj nuk u vendos`); out.priceUnclear = true; }
   }
   if (raw.rooms !== undefined) {
     const m = fold(raw.rooms).match(/(\d{1,2})\s*\+\s*\d|(\d{1,2})/);
@@ -329,7 +346,7 @@ function parseCaption(caption, ctx) {
       : /mire|good/.test(f) ? "good" : undefined;
   }
   if (raw.year !== undefined) { const m = String(raw.year).match(/\b(19|20)\d{2}\b/); if (m) out.year_built = Number(m[0]); }
-  if (raw.sea !== undefined) { const n = num(raw.sea); if (n >= 0) out.sea_m = Math.round(/km/.test(fold(raw.sea)) ? n * 1000 : n); }
+  if (raw.sea !== undefined && !/min|ore|\bh\b/.test(fold(raw.sea))) { const n = num(raw.sea); if (n >= 0) out.sea_m = Math.round(/km/.test(fold(raw.sea)) ? n * 1000 : n); }
   if (raw.orientation !== undefined) {
     const f = fold(raw.orientation);
     const o = [["north", /veri/], ["south", /jug/], ["east", /lindj/], ["west", /perendim/]].filter(([, re]) => re.test(f)).map(([k]) => k);
@@ -417,12 +434,12 @@ async function getJSON(url) {
       body = await res.json().catch(() => ({}));
     } catch (e) {
       if (attempt < 3) { await sleep(3000 * attempt); continue; }
-      throw new Error(`Instagram nuk u arrit (${e.name === "TimeoutError" ? "nuk u përgjigj" : e.message}).`);
+      throw new Error(scrub(`Instagram nuk u arrit (${e.name === "TimeoutError" ? "nuk u përgjigj" : e.message}).`));
     }
     if (res.ok && !body.error) return body;
     const err = body.error || {};
     if ((res.status >= 500 || err.is_transient) && attempt < 3) { await sleep(3000 * attempt); continue; }
-    const e = new Error(explain(err, res.status));
+    const e = new Error(scrub(explain(err, res.status)));
     Object.assign(e, { code: err.code, subcode: err.error_subcode, status: res.status, raw: err.message || "" });
     throw e;
   }
@@ -464,7 +481,7 @@ async function childrenOf(post) {
 }
 // true / false, or null when Instagram could not say (then nothing is hidden).
 async function postExists(id) {
-  if (FIXTURE) return !(FIXTURE.deleted || []).includes(id);
+  if (FIXTURE) return !FIXTURE.brokenLookup && !(FIXTURE.deleted || []).includes(id);
   try { await getJSON(apiURL(id, { fields: "id" })); return true; }
   catch (e) { return e.code === 100 && (e.subcode === 33 || /does not exist/i.test(e.raw || "")) ? false : null; }
 }
@@ -477,7 +494,7 @@ async function download(url) {
       return Buffer.from(await res.arrayBuffer());
     } catch (e) {
       if (attempt < 3) { await sleep(3000 * attempt); continue; }
-      throw new Error(`foto nuk u shkarkua (${e.message})`);
+      throw new Error(scrub(`foto nuk u shkarkua (${e.message})`));
     }
   }
 }
@@ -538,21 +555,43 @@ async function savePhotos(post, notes, lenient) {
 /* ------------------------------ listings ------------------------------ */
 function context() {
   const zones = readJSON("data/zones.json");
+  // Zone names only (never the ids, which are short words like "liqeni"), plus the common forms of one-word names
+  // ("Astiri", "Golemit", "Vlora", "Sarandës").
   const zoneIdx = new Map(), areas = {};
+  const noPrep = (s) => s.replace(/^(në|ne|te|tek)\s+/i, "");
   for (const g of zones.groups || []) for (const a of g.areas || []) {
     areas[a.id] = { ...a, group: g };
-    for (const n of [a.id, a.sq, a.en, a.in_sq && a.in_sq.replace(/^(në|ne|te|tek)\s+/i, "")]) if (n) zoneIdx.set(fold(n), a.id);
+    const forms = [a.sq, a.en, a.in_sq && noPrep(a.in_sq)].filter(Boolean);
+    if (a.id !== "qender" && !/\s/.test(a.sq)) {
+      if (/[ë]$/.test(a.sq)) forms.push(a.sq.slice(0, -1) + "a", a.sq.slice(0, -1) + "ës");
+      else if (/[^aeiouyë]$/i.test(a.sq)) forms.push(a.sq + "i", a.sq + "it");
+    }
+    for (const n of forms) zoneIdx.set(fold(n).replace(/[^a-z0-9 ]/g, "").trim(), a.id);
   }
-  // A zone name anywhere in a text, when exactly one zone is named ("Shitet apartament në Bllok").
+  // The city or region that may stand next to a zone ("Blloku, Tiranë", "Golem, Durrës").
+  const homeOf = (id) => new Set([areas[id].group.sq, areas[id].group.en, areas[id].group.in_sq && noPrep(areas[id].group.in_sq), areas[id].region,
+    ...(areas[id].group.city ? ["Tirana", "Tiranës", "Tiranën"] : []), "Shqipëri", "Shqipëria", "Albania"].filter(Boolean).map((n) => fold(n)));
+  // One zone, or none when two are named; "Golem, Durrës" is Golem, because Durrës is Golem's region.
+  const pick = (ids) => {
+    let list = [...new Set(ids)];
+    list = list.filter((x) => !list.some((y) => y !== x && fold(areas[y].region || "") === fold(areas[x].sq)));
+    return list.length === 1 ? list[0] : "";
+  };
+  // A zone named anywhere in a text ("Shitet apartament në Bllok"). "Qendër" is too common a word to count here.
   const zoneIn = (v) => {
     const f = " " + fold(stripEmoji(v)).replace(/[^a-z0-9]+/g, " ") + " ";
-    const ids = new Set([...zoneIdx].filter(([n]) => n.length >= 4 && f.includes(` ${n} `)).map(([, id]) => id));
-    return ids.size === 1 ? [...ids][0] : "";
+    return pick([...zoneIdx].filter(([n, id]) => id !== "qender" && n.length >= 4 && f.includes(` ${n} `)).map(([, id]) => id));
   };
   const zoneOf = (v) => {
     const f = fold(stripEmoji(v)).replace(/^(zona|lagjja|lagja|tek|te|ne)\s+/, "");
-    for (const part of [f, ...f.split(/\s*[,\-–\/|(]\s*/)]) { const id = zoneIdx.get(part.replace(/[^a-z0-9 ]/g, "").trim()); if (id) return id; }
-    return zoneIn(v);
+    const whole = zoneIdx.get(f.replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim());
+    if (whole) return whole;
+    const parts = f.split(/\s*[,\-–\/|()]\s*/).map((x) => x.replace(/[^a-z0-9 ]/g, "").trim()).filter(Boolean);
+    const ids = parts.map((x) => zoneIdx.get(x)).filter(Boolean);
+    const id = ids.length ? pick(ids) : zoneIn(v);
+    // "Qendër, Vlorë" or "Qendër, Shkodër" is not Tirana's centre.
+    if (id === "qender" && parts.some((x) => !zoneIdx.has(x) && !homeOf(id).has(x))) return "";
+    return id;
   };
   // Place names written back with capitals after an all-caps line was lowercased ("në bllok" → "në Bllok").
   const names = new Set(["Tiranë", "Tirana", "Tiranës", "Tiranën", "Shqipëri", "Shqipëria", "Shqipërisë"]);
@@ -596,6 +635,7 @@ function makeListing({ code, post, parsed, images, added, ctx }) {
   if (!f.type) missing.push("lloji i pronës");
   if (!f.zone) missing.push("zona nga lista");
   if (!images.length) missing.push("fotot");
+  if (f.priceUnclear) missing.push("çmimi në euro");
   const notes = [...parsed.notes];
   l.note = [`Nga Instagram: ${post.permalink || post.id}.`, missing.length ? `PËR T'U PLOTËSUAR: mungon ${missing.join(", ")}.` : "", notes.length ? `Shënime: ${notes.join("; ")}.` : ""]
     .filter(Boolean).join(" ");
@@ -607,7 +647,7 @@ function makeListing({ code, post, parsed, images, added, ctx }) {
 /* -------------------------------- run -------------------------------- */
 function loadState() {
   const s = exists(STATE_FILE) ? readJSON(STATE_FILE) : {};
-  return { note: "Lidhja me Instagram-in (scripts/instagram-import.js): cili postim u bë cila pronë. Mos e ndrysho me dorë.", since: s.since || "", month: s.month || "", posts: s.posts || {} };
+  return { note: "Lidhja me Instagram-in (scripts/instagram-import.js): cili postim u bë cila pronë. Mos e ndrysho me dorë.", account: s.account || "", since: s.since || "", month: s.month || "", posts: s.posts || {} };
 }
 function output(vars) {
   if (!env.GITHUB_OUTPUT) return;
@@ -617,7 +657,7 @@ function output(vars) {
 async function run() {
   if (!TOKEN && !FIXTURE) {
     log("Instagram nuk është lidhur ende (mungon IG_ACCESS_TOKEN). Asgjë për të bërë.");
-    output({ changed: "false", deploy: "false" });
+    output({ changed: "false", deploy: "false", failed: "false" });
     return;
   }
   if (!USER) throw new Error("Mungon IG_USER_ID (duhet kur përdoret graph.facebook.com).");
@@ -633,12 +673,19 @@ async function run() {
   const windowStart = new Date(NOW - WINDOW_DAYS * 864e5);
   const from = sinceArg && sinceArg < windowStart ? sinceArg : new Date(Math.max(new Date(state.since), windowStart));
   for (const [id, p] of Object.entries(state.posts)) if (!p.code && p.posted && new Date(p.posted) < from) delete state.posts[id];
+  // The key must belong to the account connected first; otherwise every property would look deleted.
+  const account = FIXTURE ? FIXTURE.username || "test" : String((await getJSON(apiURL(USER, { fields: "username" }))).username || "");
+  if (state.account && account && state.account !== account) {
+    throw new Error(`Çelësi i Instagram-it është për @${account}, jo për @${state.account} që ishte lidhur. Nëse kjo është me qëllim (llogaria ndryshoi emër), fshi rreshtin "account" te data/instagram.json.`);
+  }
+  if (account) state.account = account;
   const { posts, complete } = await listPosts(from);
   const { codes, bad } = readCodes();
   if (bad.length) throw new Error(`Pronat në data/listings kanë probleme, ndaj Instagram-i pret: ${bad.join("; ")}.`);
   const usedCodes = new Set([...codes.keys(), ...Object.values(state.posts).map((p) => p.code).filter(Boolean)]);
-  const nextCode = () => { let c = Math.max(100, ...usedCodes) + 1; usedCodes.add(c); return c; };
+  const nextCode = () => { const c = Math.max(FIRST_CODE - 1, ...[...usedCodes].filter((x) => x >= FIRST_CODE)) + 1; usedCodes.add(c); return c; };
   const report = [];
+  const failed = [];
   const changedCodes = [];
 
   for (const post of [...posts].sort((a, b) => tsOf(a.timestamp) - tsOf(b.timestamp))) {
@@ -647,6 +694,7 @@ async function run() {
     const link = post.permalink || "";
     const posted = tsOf(post.timestamp).toISOString();
     if (prev && prev.caption === capHash && prev.result !== "retry") continue;
+    const priorTries = prev && prev.result === "retry" ? prev.tries || 0 : 0; // an edited caption starts the tries again
     try {
       // Edited caption of a post that is already a property.
       if (prev && prev.code && ["published", "draft"].includes(prev.result)) {
@@ -654,8 +702,16 @@ async function run() {
         if (!exists(file)) { Object.assign(prev, { caption: capHash, result: "removed", note: "prona u fshi nga paneli" }); continue; }
         if (hash(readText(file)) !== prev.file) { Object.assign(prev, { caption: capHash, result: "panel", note: "u ndryshua në panel; Instagram-i nuk e prek më" }); continue; }
         const parsed = parseCaption(post.caption, ctx);
-        if (!parsed.isProperty) { Object.assign(prev, { caption: capHash, note: "përshkrimi i ri nuk duket si pronë; prona mbeti siç ishte" }); continue; }
         const old = readJSON(file);
+        if (!parsed.isProperty && parsed.closed) { // caption changed to "E SHITUR" / "U dha me qira"
+          const text = toJSON({ ...old, status: parsed.closed, updated: tiranaDate(NOW) });
+          write(file, text);
+          Object.assign(prev, { caption: capHash, file: hash(text), note: `statusi u bë ${parsed.closed} nga Instagram-i` });
+          changedCodes.push(`${prev.code} (${parsed.closed === "sold" ? "e shitur" : "e dhënë me qira"})`);
+          report.push(`Statusi ${prev.code}: ${parsed.closed === "sold" ? "e shitur" : "e dhënë me qira"}`);
+          continue;
+        }
+        if (!parsed.isProperty) { Object.assign(prev, { caption: capHash, note: "përshkrimi i ri nuk duket si pronë; prona mbeti siç ishte" }); continue; }
         const images = (old.images || []).map((x) => x.image).filter(Boolean);
         const { listing, missing } = makeListing({ code: prev.code, post, parsed, images, added: old.added, ctx });
         if (tiranaDate(NOW) !== old.added) listing.updated = tiranaDate(NOW);
@@ -667,42 +723,55 @@ async function run() {
         report.push(`Përditësuar ${prev.code}: ${listing.title_sq}${missing.length ? " – e fshehur, mungon " + missing.join(", ") : ""}`);
         continue;
       }
-      if (prev && ["panel", "removed", "deleted", "error"].includes(prev.result)) { prev.caption = capHash; continue; }
+      if (prev && ["panel", "removed", "deleted"].includes(prev.result)) { prev.caption = capHash; continue; }
 
       // New post (or one that was not a property before, or failed last time).
       const parsed = parseCaption(post.caption, ctx);
       if (!parsed.isProperty) {
         state.posts[post.id] = { result: "ignored", caption: capHash, link, posted };
-        report.push(`Anashkaluar (nuk është postim prone): ${link}`);
+        report.push(`Anashkaluar (${parsed.closed ? "njoftim për pronë të shitur / dhënë me qira" : "nuk është postim prone"}): ${link}`);
         continue;
       }
       const notes = parsed.notes;
       let code = parsed.fields.code;
-      if (code && usedCodes.has(code)) { notes.push(`kodi ${code} ishte i zënë nga një pronë tjetër`); code = 0; }
-      const images = await savePhotos(post, notes, ((prev && prev.tries) || 0) >= 2);
+      const repost = code && usedCodes.has(code) ? code : 0;
+      if (repost) { notes.push(`kodi ${repost} është i një prone që ekziston, ndaj ky postim u ruajt i fshehur që prona të mos dalë dy herë (nëse është pronë tjetër, hiq „Fshih”)`); code = 0; }
+      const images = await savePhotos(post, notes, priorTries >= 2);
       code = code || nextCode(); // only once the photos are in, so a failed post leaves no gap in the codes
       usedCodes.add(code);
       const { listing, missing } = makeListing({ code, post, parsed, images, added: tiranaDate(tsOf(post.timestamp)), ctx });
+      if (repost) listing.hidden = true;
+      const hidden = Boolean(listing.hidden);
       if (exists(listingFile(code))) throw new Error(`skedari ${listingFile(code)} ekziston tashmë`);
       const text = toJSON(listing);
       write(listingFile(code), text);
-      state.posts[post.id] = { code, result: missing.length ? "draft" : "published", caption: capHash, file: hash(text), link, posted, note: missing.length ? `mungon ${missing.join(", ")}` : "" };
-      changedCodes.push(`${code}${missing.length ? " (e fshehur)" : " (e re)"}`);
-      report.push(`${missing.length ? "E fshehur, për t'u plotësuar në panel" : "Online"} ${code}: ${listing.title_sq}${missing.length ? " – mungon " + missing.join(", ") : ""}${notes.length ? " – " + notes.join("; ") : ""}`);
+      state.posts[post.id] = { code, result: hidden ? "draft" : "published", caption: capHash, file: hash(text), link, posted, note: missing.length ? `mungon ${missing.join(", ")}` : repost ? `ripostim i ${repost}?` : "" };
+      changedCodes.push(`${code}${hidden ? " (e fshehur)" : " (e re)"}`);
+      report.push(`${hidden ? "E fshehur, për t'u plotësuar në panel" : "Online"} ${code}: ${listing.title_sq}${missing.length ? " – mungon " + missing.join(", ") : ""}${notes.length ? " – " + notes.join("; ") : ""}`);
     } catch (e) {
-      const tries = ((prev && prev.tries) || 0) + 1;
-      if (prev && prev.code && ["published", "draft"].includes(prev.result)) { report.push(`Gabim te ${link}: ${e.message}`); continue; }
-      state.posts[post.id] = { result: tries >= MAX_TRIES ? "error" : "retry", tries, link, posted, caption: tries >= MAX_TRIES ? capHash : "", note: e.message };
-      report.push(`Gabim te ${link} (prova ${tries}): ${e.message}`);
+      const msg = scrub(e.message);
+      const tries = priorTries + 1;
+      if (prev && prev.code && ["published", "draft"].includes(prev.result)) { report.push(`Gabim te ${link}: ${msg}`); continue; }
+      state.posts[post.id] = { result: tries >= MAX_TRIES ? "error" : "retry", tries, link, posted, caption: tries >= MAX_TRIES ? capHash : "", note: msg };
+      report.push(`Gabim te ${link} (prova ${tries}${tries >= MAX_TRIES ? ", e fundit: ndrysho përshkrimin e postimit për ta provuar sërish" : ""}): ${msg}`);
+      if (tries >= MAX_TRIES) failed.push(`Postimi ${link} nuk u kthye dot në pronë: ${msg}`);
     }
   }
 
   // Posts deleted on Instagram: their properties are hidden, unless they were changed in the panel.
+  // Many at once could be a key without the right permissions: then a post that is surely there is looked up the same way,
+  // and if that one also looks deleted, nothing is hidden.
   if (complete) {
     const seen = new Set(posts.map((p) => p.id));
+    const gone = [];
     for (const [id, p] of Object.entries(state.posts)) {
       if (seen.has(id) || !p.code || !["published", "draft"].includes(p.result) || (p.posted && new Date(p.posted) < from)) continue;
-      if ((await postExists(id)) !== false) continue;
+      if ((await postExists(id)) === false) gone.push(p);
+    }
+    const trusted = gone.length <= MAX_HIDE || (posts.length > 0 && (await postExists(posts[0].id)) === true);
+    if (!trusted) {
+      failed.push(`${gone.length} postime duken të fshira njëherësh (pronat ${gone.map((p) => p.code).join(", ")}). Asnjë pronë nuk u fsheh; kontrollo çelësin e Instagram-it.`);
+    } else for (const p of gone) {
       const file = listingFile(p.code);
       if (exists(file) && hash(readText(file)) === p.file) {
         const l = readJSON(file);
@@ -726,9 +795,11 @@ async function run() {
   const subject = deploy ? `Instagram: pronat ${changedCodes.join(", ")}` : "Instagram: gjendja e lidhjes [skip netlify]";
   const msgFile = env.IG_COMMIT_MSG_FILE || path.join(os.tmpdir(), "ig-commit-msg");
   fs.writeFileSync(msgFile, [subject, "", ...report].join("\n") + "\n");
-  output({ changed: String(stateChanged || deploy), deploy: String(deploy) });
+  output({ changed: String(stateChanged || deploy), deploy: String(deploy), failed: String(failed.length > 0) });
+  if (env.GITHUB_ACTIONS) for (const f of failed) console.log(`::error::${f.replace(/\r?\n/g, " ")}`);
+  else for (const f of failed) console.error("KUJDES: " + f);
   log(report.length ? report.join("\n") : `Asnjë postim i ri (${posts.length} postime të kontrolluara).`);
-  if (env.GITHUB_STEP_SUMMARY && report.length) fs.appendFileSync(env.GITHUB_STEP_SUMMARY, "### Instagram → pronat\n\n" + report.map((x) => `- ${x}`).join("\n") + "\n");
+  if (env.GITHUB_STEP_SUMMARY && report.length + failed.length) fs.appendFileSync(env.GITHUB_STEP_SUMMARY, "### Instagram → pronat\n\n" + [...failed, ...report].map((x) => `- ${x}`).join("\n") + "\n");
 }
 
 async function refreshToken(file) {
@@ -774,6 +845,6 @@ if (require.main === module) {
   const [cmd, arg] = process.argv.slice(2);
   const job = cmd === "--check" ? Promise.resolve(check()) : cmd === "--refresh-token" ? refreshToken(arg)
     : cmd === "--preview" ? preview(Math.min(25, Math.max(1, Number(arg) || 5))) : run();
-  job.catch((e) => { console.error("GABIM: " + e.message); process.exit(1); });
+  job.catch((e) => { console.error("GABIM: " + scrub(e.message)); process.exit(1); });
 }
 module.exports = { parseCaption, makeListing, priceOf, typeOf, floorOf, featuresOf, stripJpeg, context };
